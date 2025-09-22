@@ -21,27 +21,16 @@ const ContestManager: React.FC = () => {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   // Development mode toggle
-  const isDevelopmentMode = process.env.REACT_APP_DEVELOPMENT_MODE === 'true';
+  // Production mode - no development helpers
 
   // API calls with development mode support
   const loadBuckets = async () => {
     try {
       setLoading(prev => ({ ...prev, buckets: true }));
       
-      if (isDevelopmentMode) {
-        // Development mode: Use mock data
-        console.log('DEVELOPMENT MODE: Using mock bucket data');
-        const mockBuckets: S3Bucket[] = [
-          { name: 'sweepstakes-dolly-parton-wines', creation_date: '2024-01-15T10:30:00Z', region: 'us-east-1' },
-          { name: 'sweepstakes-swoon-riley-arnold', creation_date: '2024-02-20T14:15:00Z', region: 'us-east-1' },
-          { name: 'sweepstakes-acme-corp', creation_date: '2024-03-10T09:45:00Z', region: 'us-east-1' }
-        ];
-        setBuckets(mockBuckets);
-      } else {
-        // Production mode: Call real AWS API
-        const bucketList = await contestAPI.listS3Buckets();
-        setBuckets(bucketList);
-      }
+      // Production mode: Call real AWS API
+      const bucketList = await contestAPI.listS3Buckets();
+      setBuckets(bucketList);
     } catch (error) {
       console.error('Failed to load buckets:', error);
       setErrors(prev => ({ ...prev, buckets: `Failed to load client buckets: ${error}` }));
@@ -57,110 +46,42 @@ const ContestManager: React.FC = () => {
     try {
       setLoading(prev => ({ ...prev, projects: true }));
       
-      if (isDevelopmentMode) {
-        // Development mode: Use mock data based on selected bucket
-        console.log('DEVELOPMENT MODE: Using mock project data for', selectedBucket);
-        const mockProjects: S3Project[] = [
-          { name: 'project-0001', path: `${selectedBucket}/project-0001/`, last_modified: '2024-01-15T10:30:00Z' },
-          { name: 'project-0002', path: `${selectedBucket}/project-0002/`, last_modified: '2024-02-20T14:15:00Z' }
-        ];
-        setProjects(mockProjects);
-      } else {
-        // Production mode: Call real AWS API
-        const projectList = await contestAPI.listProjects(selectedBucket);
-        setProjects(projectList);
-      }
+      // Production mode: Call real AWS API
+      const projectList = await contestAPI.listProjects(selectedBucket);
+      setProjects(projectList);
     } catch (error) {
       console.error('Failed to load projects:', error);
       setProjects([]);
     } finally {
       setLoading(prev => ({ ...prev, projects: false }));
     }
-  }, [selectedBucket, isDevelopmentMode]);
+  }, [selectedBucket]);
 
   // Check for existing contest rules when client/project selected
   const checkExistingRules = useCallback(async () => {
     if (!selectedBucket || !selectedProject) return;
     
     try {
-      if (isDevelopmentMode) {
-        // Development mode: Simulate existing rules check
-        console.log('DEVELOPMENT MODE: Checking for existing rules');
-        // Randomly simulate existing rules for demo
-        const hasExistingRules = Math.random() > 0.5;
-        if (hasExistingRules) {
-          const mockRules: ContestRules = {
-            age_min: 18,
-            age_max: 65,
-            eligible_states: ['CA', 'NY', 'TX', 'FL'],
-            entry_start_date: '2024-12-01',
-            entry_end_date: '2024-12-31',
-            max_entries_per_person: 1,
-            total_winners: 10,
-            winner_rules: [{ id: '1', count: 1, period: 'day' }],
-            flight_start_date: flightStartDate || '2024-12-01',
-            flight_end_date: flightEndDate || '2024-12-31',
-            prize_structure: {
-              grand_prize: 'Grand Prize',
-              runner_up_prizes: ['1st Prize', '2nd Prize']
-            }
-          };
-          setContestRules(mockRules);
-          setRulesEditMode(false); // Show saved state if rules exist
-        } else {
-          setContestRules(null);
-          setRulesEditMode(true); // Show form if no rules exist
-        }
+      // Production mode: Check for existing rules in S3
+      const existingRules = await contestAPI.getExistingRules(selectedBucket, selectedProject);
+      if (existingRules) {
+        setContestRules(existingRules);
+        setRulesEditMode(false); // Show saved state if rules exist
       } else {
-        // Production mode: Check for existing rules in S3
-        const existingRules = await contestAPI.getExistingRules(selectedBucket, selectedProject);
-        if (existingRules) {
-          setContestRules(existingRules);
-          setRulesEditMode(false); // Show saved state if rules exist
-        } else {
-          setContestRules(null);
-          setRulesEditMode(true); // Show form if no rules exist
-        }
+        setContestRules(null);
+        setRulesEditMode(true); // Show form if no rules exist
       }
     } catch (error) {
       console.error('Failed to check existing rules:', error);
       setContestRules(null);
       setRulesEditMode(true);
     }
-  }, [selectedBucket, selectedProject, isDevelopmentMode, flightStartDate, flightEndDate]);
+  }, [selectedBucket, selectedProject, flightStartDate, flightEndDate]);
 
   const loadProjectData = useCallback(async () => {
     if (!selectedBucket || !selectedProject) return;
     
     try {
-      if (isDevelopmentMode) {
-        // Development mode: Use mock data
-        console.log('DEVELOPMENT MODE: Loading mock project data');
-        
-        // Mock raw entries count
-        const mockRawCount = Math.floor(Math.random() * 1000) + 100;
-        setRawEntries(Array(mockRawCount).fill({})); // Just for count
-        
-        // Mock processing status
-        setProcessingStatus({
-          status: 'completed',
-          raw_entries: mockRawCount,
-          duplicates_removed: Math.floor(mockRawCount * 0.1),
-          rules_violations: Math.floor(mockRawCount * 0.05),
-          eligible_contestants: Math.floor(mockRawCount * 0.85),
-          message: 'Processing completed successfully'
-        });
-        
-        // Mock validated files
-        setValidatedFiles([
-          { key: 'validated_entries.json', size: 1024000, last_modified: '2024-01-15T10:30:00Z' },
-          { key: 'eligible_contestants.json', size: 512000, last_modified: '2024-01-15T10:35:00Z' }
-        ]);
-        
-        // Mock winners (empty initially)
-        setWinners([]);
-        
-      } else {
         // Production mode: Call real AWS APIs
         
         // Load raw entries count
@@ -192,7 +113,7 @@ const ContestManager: React.FC = () => {
     } catch (error) {
       console.error('Failed to load project data:', error);
     }
-  }, [selectedBucket, selectedProject, isDevelopmentMode, processingStatus?.status]);
+  }, [selectedBucket, selectedProject, processingStatus?.status]);
 
   // Load initial data
   useEffect(() => {
@@ -247,37 +168,20 @@ const ContestManager: React.FC = () => {
     try {
       setCreateStatus('creating');
       
-      if (isDevelopmentMode) {
-        // DEVELOPMENT MODE: Simulate API call for UI testing
-        await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API delay
-        
-        console.log('DEVELOPMENT: Would create bucket with data:', {
-          bucketName: fullBucketName,
-          projectHandle: projectHandle,
-          projectName: projectName,
-          clientName: clientName,
-          flightStartDate: flightStartDate + 'T00:00:00', // Add 12:00:00 AM
-          flightEndDate: flightEndDate + 'T23:59:59'      // Add 11:59:59 PM
-        });
-        
-        setCreatedBucketName(fullBucketName);
-        setCreateStatus('success');
-      } else {
-        // PRODUCTION MODE: Call real AWS API
-        const projectData = {
-          projectHandle: projectHandle,
-          projectName: projectName,
-          clientName: clientName,
-          flightStartDate: flightStartDate + 'T00:00:00',
-          flightEndDate: flightEndDate + 'T23:59:59'
-        };
-        
-        const response = await contestAPI.createS3Bucket(fullBucketName, projectData);
-        console.log('Bucket created successfully:', response);
-        
-        setCreatedBucketName(fullBucketName);
-        setCreateStatus('success');
-      }
+      // PRODUCTION MODE: Call real AWS API
+      const projectData = {
+        projectHandle: projectHandle,
+        projectName: projectName,
+        clientName: clientName,
+        flightStartDate: flightStartDate + 'T00:00:00',
+        flightEndDate: flightEndDate + 'T23:59:59'
+      };
+      
+      const response = await contestAPI.createS3Bucket(fullBucketName, projectData);
+      console.log('Bucket created successfully:', response);
+      
+      setCreatedBucketName(fullBucketName);
+      setCreateStatus('success');
       
       // Wait 2 seconds to show success message, then auto-select and close
       setTimeout(async () => {
@@ -376,14 +280,8 @@ const ContestManager: React.FC = () => {
         flight_end_date: flightEndDate || rules.flight_end_date
       };
       
-      if (isDevelopmentMode) {
-        // Development mode: simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        console.log('DEVELOPMENT: Contest rules set:', rulesWithFlightDates);
-      } else {
-        // Production mode: call real AWS API
-        await contestAPI.setContestRules(selectedBucket, selectedProject, rulesWithFlightDates);
-      }
+      // Production mode: call real AWS API
+      await contestAPI.setContestRules(selectedBucket, selectedProject, rulesWithFlightDates);
       
       setContestRules(rulesWithFlightDates);
       setRulesEditMode(false); // Switch to saved mode
@@ -873,16 +771,6 @@ const ContestManager: React.FC = () => {
                       <p className="error-message">• End date must be after start date</p>
                     )}
                     
-                    {/* Development mode helper */}
-                    {isDevelopmentMode && (
-                      <div className="dev-helper">
-                        <p><strong>🚀 Development Mode - Form Validation:</strong></p>
-                        <p>✅ Client Name: {clientName ? (isValidClientName(clientName) ? 'Valid' : 'Invalid (use lowercase, letters/numbers/hyphens)') : 'Required'}</p>
-                        <p>✅ Project Handle: {projectHandle ? (isValidProjectHandle(projectHandle) ? 'Valid' : 'Invalid (numbers only)') : 'Required'}</p>
-                        <p>✅ Start Date: {flightStartDate ? 'Valid' : 'Required'}</p>
-                        <p>✅ End Date: {flightEndDate ? (isValidDateRange() ? 'Valid' : 'Must be after start date') : 'Required'}</p>
-                      </div>
-                    )}
                   </div>
                   </div>
                 </>
