@@ -1543,3 +1543,22 @@ input:focus {
     display: none;
   }
 }
+
+/* Development mode helper styles */
+.dev-helper {
+  background: #e3f2fd;
+  border: 1px solid #2196f3;
+  border-radius: 4px;
+  padding: 1rem;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.dev-helper p {
+  margin: 0.25rem 0;
+  color: #1976d2;
+}
+
+.dev-helper strong {
+  color: #0d47a1;
+}

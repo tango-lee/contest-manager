@@ -767,55 +767,6 @@ const ContestManager: React.FC = () => {
         )}
       </section>
 
-      {/* Data & Integration */}
-      <section className="section data-integration">
-        <div className="section-header">
-          <h2>🔄 Data & Integration</h2>
-        </div>
-        <div className="button-grid">
-          <button className="action-btn">Get Campaign Reports</button>
-          <button className="action-btn">Update Monday.com Now</button>
-          <button className="action-btn danger">Emergency Stop Campaign</button>
-        </div>
-      </section>
-
-      {/* Developer Testing Panel */}
-      <section className="section developer-testing">
-        <div className="section-header">
-          <h2>🧪 Developer Testing Panel</h2>
-        </div>
-        <div className="button-grid">
-          <button className="action-btn">API Test Suite</button>
-          <button className="action-btn">Load Test Data</button>
-          <button className="action-btn">Manual Triggers</button>
-          <button className="action-btn">S3 Communication Test</button>
-        </div>
-      </section>
-
-      {/* System Health Monitor */}
-      <section className="section system-health">
-        <div className="section-header">
-          <h2>📊 System Health Monitor</h2>
-        </div>
-        <div className="health-grid">
-          <div className="health-card">
-            <span className="status healthy">●</span>
-            <span className="service">Lambda Functions</span>
-          </div>
-          <div className="health-card">
-            <span className="status healthy">●</span>
-            <span className="service">S3 Connectivity</span>
-          </div>
-          <div className="health-card">
-            <span className="status healthy">●</span>
-            <span className="service">API Gateway</span>
-          </div>
-          <div className="health-card">
-            <span className="status warning">●</span>
-            <span className="service">Monday.com Sync</span>
-          </div>
-        </div>
-      </section>
 
       {/* Create Bucket Modal */}
       {showCreateModal && (
@@ -916,12 +867,23 @@ const ContestManager: React.FC = () => {
                         <small className="time-note">Time set to 11:59:59 PM</small>
                       </div>
                     </div>
-                    <div className="input-instructions">
-                      <p>• Enter the Start and End Dates for this project.</p>
-                      {flightStartDate && flightEndDate && !isValidDateRange() && (
-                        <p className="error-message">• End date must be after start date</p>
-                      )}
-                    </div>
+                  <div className="input-instructions">
+                    <p>• Enter the Start and End Dates for this project.</p>
+                    {flightStartDate && flightEndDate && !isValidDateRange() && (
+                      <p className="error-message">• End date must be after start date</p>
+                    )}
+                    
+                    {/* Development mode helper */}
+                    {isDevelopmentMode && (
+                      <div className="dev-helper">
+                        <p><strong>🚀 Development Mode - Form Validation:</strong></p>
+                        <p>✅ Client Name: {clientName ? (isValidClientName(clientName) ? 'Valid' : 'Invalid (use lowercase, letters/numbers/hyphens)') : 'Required'}</p>
+                        <p>✅ Project Handle: {projectHandle ? (isValidProjectHandle(projectHandle) ? 'Valid' : 'Invalid (numbers only)') : 'Required'}</p>
+                        <p>✅ Start Date: {flightStartDate ? 'Valid' : 'Required'}</p>
+                        <p>✅ End Date: {flightEndDate ? (isValidDateRange() ? 'Valid' : 'Must be after start date') : 'Required'}</p>
+                      </div>
+                    )}
+                  </div>
                   </div>
                 </>
               )}

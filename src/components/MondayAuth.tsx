@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import mondaySdk from 'monday-sdk-js';
 import './MondayAuth.css';
 
@@ -8,9 +8,11 @@ interface MondayAuthProps {
 
 interface MondayUser {
   id: string;
-  name: string;
-  email: string;
+  name?: string;
+  email?: string;
   photo_original?: string;
+  // Allow any additional properties from Monday.com SDK
+  [key: string]: any;
 }
 
 const MondayAuth: React.FC<MondayAuthProps> = ({ children }) => {
@@ -19,9 +21,59 @@ const MondayAuth: React.FC<MondayAuthProps> = ({ children }) => {
   const [user, setUser] = useState<MondayUser | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Development mode bypass
+  const isDevelopmentMode = process.env.NODE_ENV === 'development' && process.env.REACT_APP_BYPASS_AUTH === 'true';
+
+  const redirectToOAuth = useCallback(() => {
+    const clientId = process.env.REACT_APP_MONDAY_CLIENT_ID;
+    const redirectUri = encodeURIComponent(window.location.origin);
+    
+    if (!clientId) {
+      setError('Monday.com app not configured. Please contact your administrator.');
+      return;
+    }
+    
+    const oauthUrl = `https://auth.monday.com/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=boards:read users:read`;
+    window.location.href = oauthUrl;
+  }, []);
+
+  const validateToken = useCallback(async (token: string) => {
+    try {
+      const monday = mondaySdk();
+      monday.setToken(token);
+      
+      const userResponse = await monday.api('query { me { id name email photo_original } }');
+      
+      if (userResponse.data && userResponse.data.me) {
+        setUser(userResponse.data.me);
+        setIsAuthenticated(true);
+      } else {
+        localStorage.removeItem('monday_access_token');
+        redirectToOAuth();
+      }
+    } catch (error) {
+      console.error('Token validation error:', error);
+      localStorage.removeItem('monday_access_token');
+      redirectToOAuth();
+    }
+  }, [redirectToOAuth]);
+
   useEffect(() => {
     const initializeMondayAuth = async () => {
       try {
+        // Development mode bypass
+        if (isDevelopmentMode) {
+          console.log('🚀 Development mode: Bypassing Monday.com authentication');
+          setUser({
+            id: 'dev-user',
+            name: 'Development User',
+            email: 'dev@optivateagency.com'
+          });
+          setIsAuthenticated(true);
+          setIsLoading(false);
+          return;
+        }
+
         // Initialize Monday SDK
         const monday = mondaySdk();
         
@@ -69,7 +121,7 @@ const MondayAuth: React.FC<MondayAuthProps> = ({ children }) => {
     };
 
     initializeMondayAuth();
-  }, []);
+  }, [validateToken]);
 
   const handleOAuthCallback = async (code: string) => {
     try {
@@ -95,40 +147,6 @@ const MondayAuth: React.FC<MondayAuthProps> = ({ children }) => {
       console.error('OAuth callback error:', error);
       setError('OAuth processing error');
     }
-  };
-
-  const validateToken = async (token: string) => {
-    try {
-      const monday = mondaySdk();
-      monday.setToken(token);
-      
-      const userResponse = await monday.api('query { me { id name email photo_original } }');
-      
-      if (userResponse.data && userResponse.data.me) {
-        setUser(userResponse.data.me);
-        setIsAuthenticated(true);
-      } else {
-        localStorage.removeItem('monday_access_token');
-        redirectToOAuth();
-      }
-    } catch (error) {
-      console.error('Token validation error:', error);
-      localStorage.removeItem('monday_access_token');
-      redirectToOAuth();
-    }
-  };
-
-  const redirectToOAuth = () => {
-    const clientId = process.env.REACT_APP_MONDAY_CLIENT_ID;
-    const redirectUri = encodeURIComponent(window.location.origin);
-    
-    if (!clientId) {
-      setError('Monday.com app not configured. Please contact your administrator.');
-      return;
-    }
-    
-    const oauthUrl = `https://auth.monday.com/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=boards:read users:read`;
-    window.location.href = oauthUrl;
   };
 
   const logout = () => {
@@ -189,9 +207,9 @@ const MondayAuth: React.FC<MondayAuthProps> = ({ children }) => {
     <div className="authenticated-app">
       <div className="user-info">
         {user?.photo_original && (
-          <img src={user.photo_original} alt={user.name} className="user-avatar" />
+          <img src={user.photo_original} alt={user?.name || 'User'} className="user-avatar" />
         )}
-        <span className="user-name">{user?.name}</span>
+        <span className="user-name">{user?.name || user?.email || 'Monday.com User'}</span>
         <button onClick={logout} className="logout-btn">Logout</button>
       </div>
       {children}
