@@ -1,6 +1,8 @@
 // Contest Manager API Client
 // Centralized API calls to AWS Gateway endpoints
 
+import { config } from '../config/environment';
+
 export interface ContestEntry {
   first_name: string;
   last_name: string;
@@ -94,8 +96,8 @@ class ContestManagerAPI {
   private apiKey?: string;
 
   constructor() {
-    this.baseURL = process.env.REACT_APP_API_BASE_URL || 'https://your-api-gateway-url.execute-api.us-east-1.amazonaws.com/dev';
-    this.apiKey = process.env.REACT_APP_API_KEY;
+    this.baseURL = config.apiBaseUrl;
+    this.apiKey = config.apiKey;
   }
 
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
