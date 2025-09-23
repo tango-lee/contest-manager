@@ -132,7 +132,7 @@ const ContestManager: React.FC = () => {
         } catch (error) {
           setWinners([]);
         }
-      }
+        
     } catch (error) {
       console.error('Failed to load project data:', error);
     }
