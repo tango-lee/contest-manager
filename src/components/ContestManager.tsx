@@ -796,16 +796,16 @@ const ContestManager: React.FC = () => {
                   </div>
                   <div className="stat-content">
                     <div className="stat-number">
-                      {processingStatus?.stats?.total_processed || validatedFiles.length}
+                      {processingStatus?.eligible_contestants || validatedFiles.length}
                     </div>
                     <div className="stat-label">Eligible Entries</div>
-                    {processingStatus?.stats && (
+                    {processingStatus && (
                       <div className="stat-details">
                         <div className="stat-breakdown">
-                          Unique: {processingStatus.stats.unique_entries || 'N/A'}
+                          Raw Entries: {processingStatus.raw_entries || 'N/A'}
                         </div>
                         <div className="stat-breakdown">
-                          Duplicates: {processingStatus.stats.duplicates_removed || 'N/A'}
+                          Duplicates: {processingStatus.duplicates_removed || 'N/A'}
                         </div>
                       </div>
                     )}
@@ -818,16 +818,16 @@ const ContestManager: React.FC = () => {
                   </div>
                   <div className="stat-content">
                     <div className="stat-number">
-                      {processingStatus?.stats ? 
-                        `${Math.round((processingStatus.stats.total_processed / rawEntries.length) * 100)}%` : 
+                      {processingStatus ? 
+                        `${Math.round((processingStatus.eligible_contestants / rawEntries.length) * 100)}%` : 
                         '0%'
                       }
                     </div>
                     <div className="stat-label">Entries Eligible</div>
-                    {processingStatus?.stats?.filtered_out && (
+                    {processingStatus?.rules_violations && (
                       <div className="stat-details">
                         <div className="stat-breakdown error">
-                          Filtered out: {processingStatus.stats.filtered_out}
+                          Rules Violations: {processingStatus.rules_violations}
                         </div>
                       </div>
                     )}
