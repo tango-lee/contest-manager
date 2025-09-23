@@ -168,6 +168,27 @@ class ContestManagerAPI {
     return this.request(`/buckets/${bucketName}/projects`);
   }
 
+  // Raw Entries Management
+  async getRawEntriesCount(bucketName: string, projectName: string): Promise<number> {
+    try {
+      const response = await this.request(`/data/raw-count/${bucketName}/${projectName}`);
+      return response.count || 0;
+    } catch (error) {
+      console.warn('Failed to get raw entries count:', error);
+      return 0;
+    }
+  }
+
+  // Validated Entries Management
+  async getValidatedEntries(bucketName: string, projectName: string): Promise<S3File[]> {
+    try {
+      return this.request(`/data/validated/${bucketName}/${projectName}`);
+    } catch (error) {
+      console.warn('Failed to get validated entries:', error);
+      return [];
+    }
+  }
+
   // Raw entries from /{project-id}/entries/raw/
   async getRawEntries(bucketName: string, projectId: string): Promise<any[]> {
     return this.request<any[]>(`/s3/${bucketName}/${projectId}/entries/raw`);
@@ -215,11 +236,15 @@ class ContestManagerAPI {
     }
   }
 
-  // Data Processing
+  // Data Processing (Updated for new on-demand system)
   async processData(bucketName: string, projectName: string) {
     return this.request('/data/process', {
       method: 'POST',
-      body: JSON.stringify({ bucket_name: bucketName, project_name: projectName }),
+      body: JSON.stringify({ 
+        bucket_name: bucketName, 
+        project_name: projectName,
+        processing_type: 'final'
+      }),
     });
   }
 
@@ -228,8 +253,21 @@ class ContestManagerAPI {
   }
 
   async downloadFilteredCSV(bucketName: string, projectName: string) {
-    const response = await this.request<{ download_url: string }>(`/data/filtered/csv/${bucketName}/${projectName}`);
-    window.location.href = response.download_url;
+    // Use new on-demand processing for CSV downloads
+    const response = await this.request<{ download_url: string }>('/data/process', {
+      method: 'POST',
+      body: JSON.stringify({ 
+        bucket_name: bucketName, 
+        project_name: projectName,
+        processing_type: 'temp'
+      }),
+    });
+    
+    if (response.download_url) {
+      window.location.href = response.download_url;
+    } else {
+      throw new Error('No download URL received from processing');
+    }
   }
 
   // Winner Management

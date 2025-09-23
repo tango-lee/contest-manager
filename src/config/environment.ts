@@ -2,7 +2,7 @@
 
 export const config = {
   // API Configuration - AWS Gateway endpoints
-  apiBaseUrl: process.env.REACT_APP_API_BASE_URL || 'https://your-api-gateway-id.execute-api.us-east-1.amazonaws.com/dev',
+  apiBaseUrl: process.env.REACT_APP_API_BASE_URL || 'https://0gt6s4bqo5.execute-api.us-east-1.amazonaws.com/prod',
   apiKey: process.env.REACT_APP_API_KEY || '',
   
   // Environment
