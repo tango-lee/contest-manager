@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { contestAPI, S3Bucket, S3Project, S3File, ContestRules, ProcessingStatus, Winner, WinnerRule } from '../utils/apiClient';
+import { contestAPI, S3Bucket, S3Project, S3File, ContestRules, ProcessingStatus, Winner, WinnerRule, ProjectBlacklist } from '../utils/apiClient';
 import './ContestManager.css';
 
 const ContestManager: React.FC = () => {
@@ -17,6 +17,8 @@ const ContestManager: React.FC = () => {
   const [flightStartDate, setFlightStartDate] = useState('');
   const [flightEndDate, setFlightEndDate] = useState('');
   const [winners, setWinners] = useState<Winner[]>([]);
+  const [projectBlacklist, setProjectBlacklist] = useState<ProjectBlacklist | null>(null);
+  const [blacklistEditMode, setBlacklistEditMode] = useState<boolean>(true);
   const [loading, setLoading] = useState<{ [key: string]: boolean }>({});
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
@@ -78,6 +80,27 @@ const ContestManager: React.FC = () => {
     }
   }, [selectedBucket, selectedProject, flightStartDate, flightEndDate]);
 
+  // Check for existing blacklist when client/project selected
+  const checkExistingBlacklist = useCallback(async () => {
+    if (!selectedBucket || !selectedProject) return;
+    
+    try {
+      // Production mode: Check for existing blacklist in S3
+      const existingBlacklist = await contestAPI.getProjectBlacklist(selectedBucket, selectedProject);
+      if (existingBlacklist) {
+        setProjectBlacklist(existingBlacklist);
+        setBlacklistEditMode(false); // Show saved state if blacklist exists
+      } else {
+        setProjectBlacklist(null);
+        setBlacklistEditMode(true); // Show form if no blacklist exists
+      }
+    } catch (error) {
+      console.error('Failed to check existing blacklist:', error);
+      setProjectBlacklist(null);
+      setBlacklistEditMode(true);
+    }
+  }, [selectedBucket, selectedProject]);
+
   const loadProjectData = useCallback(async () => {
     if (!selectedBucket || !selectedProject) return;
     
@@ -128,13 +151,14 @@ const ContestManager: React.FC = () => {
 
   useEffect(() => {
     if (selectedBucket && selectedProject) {
-      // Check for existing rules first, then load project data
+      // Check for existing rules and blacklist first, then load project data
       checkExistingRules();
+      checkExistingBlacklist();
       loadProjectData();
       // Update timestamp when project is selected (this is when sync fires)
       setLastRawSync(new Date().toISOString());
     }
-  }, [selectedBucket, selectedProject, checkExistingRules, loadProjectData]);
+  }, [selectedBucket, selectedProject, checkExistingRules, checkExistingBlacklist, loadProjectData]);
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [modalType, setModalType] = useState<'client' | 'project'>('client');
@@ -290,6 +314,23 @@ const ContestManager: React.FC = () => {
       alert('Failed to set contest rules: ' + error);
     } finally {
       setLoading(prev => ({ ...prev, setRules: false }));
+    }
+  };
+
+  const setBlacklist = async (blacklist: ProjectBlacklist) => {
+    try {
+      setLoading(prev => ({ ...prev, setBlacklist: true }));
+      
+      // Production mode: call real AWS API
+      await contestAPI.setProjectBlacklist(selectedBucket, selectedProject, blacklist);
+      
+      setProjectBlacklist(blacklist);
+      setBlacklistEditMode(false); // Switch to saved mode
+    } catch (error) {
+      console.error('Failed to set project blacklist:', error);
+      alert('Failed to set project blacklist: ' + error);
+    } finally {
+      setLoading(prev => ({ ...prev, setBlacklist: false }));
     }
   };
 
@@ -584,6 +625,110 @@ const ContestManager: React.FC = () => {
         )}
       </section>
 
+      {/* Entry Blacklist Management */}
+      <section className="section blacklist-management">
+        <div className="section-header">
+          <h2>🚫 Entry Blacklist Management</h2>
+          <p className="section-description">
+            Manage entries that should be automatically filtered out during data processing. 
+            This blacklist is specific to this project and will be applied when processing raw entries.
+          </p>
+        </div>
+
+        {hasClientAndProject && (
+          <>
+            {blacklistEditMode ? (
+              <div className="blacklist-form">
+                <BlacklistForm 
+                  blacklist={projectBlacklist} 
+                  onSave={setBlacklist} 
+                  loading={loading.setBlacklist}
+                />
+              </div>
+            ) : (
+              <div className="blacklist-saved-display">
+                <div className="saved-blacklist-header">
+                  <h3>✅ Project Blacklist Configured</h3>
+                  <button
+                    onClick={() => setBlacklistEditMode(true)}
+                    className="edit-blacklist-btn"
+                  >
+                    Edit Blacklist
+                  </button>
+                </div>
+                
+                {projectBlacklist && (
+                  <div className="saved-blacklist-content">
+                    <div className="blacklist-summary-grid">
+                      <div className="blacklist-section">
+                        <h4>📧 Blocked Emails ({projectBlacklist.emails.length})</h4>
+                        <div className="blacklist-items">
+                          {projectBlacklist.emails.length > 0 ? (
+                            projectBlacklist.emails.map((email, index) => (
+                              <span key={index} className="blacklist-tag email-tag">
+                                {email}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="no-items">No blocked emails</span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="blacklist-section">
+                        <h4>👤 Blocked Names ({projectBlacklist.names.length})</h4>
+                        <div className="blacklist-items">
+                          {projectBlacklist.names.length > 0 ? (
+                            projectBlacklist.names.map((name, index) => (
+                              <span key={index} className="blacklist-tag name-tag">
+                                {name}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="no-items">No blocked names</span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="blacklist-section">
+                        <h4>📞 Blocked Phones ({projectBlacklist.phones.length})</h4>
+                        <div className="blacklist-items">
+                          {projectBlacklist.phones.length > 0 ? (
+                            projectBlacklist.phones.map((phone, index) => (
+                              <span key={index} className="blacklist-tag phone-tag">
+                                {phone}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="no-items">No blocked phones</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="blacklist-info">
+                      <p className="info-text">
+                        <strong>Note:</strong> This blacklist will be automatically applied when processing raw entries. 
+                        Entries matching any of these criteria will be filtered out and counted in the processing statistics.
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </>
+        )}
+
+        {!hasClientAndProject && (
+          <div className="no-selection-state">
+            <div className="no-selection-content">
+              <div className="no-selection-icon">🚫</div>
+              <h3>Select Client & Project</h3>
+              <p>Choose a client and project above to manage the entry blacklist for that specific project.</p>
+            </div>
+          </div>
+        )}
+      </section>
 
       {/* Validated Data Viewer */}
       <section className="section validated-data">
@@ -1338,6 +1483,109 @@ const ContestRulesForm: React.FC<ContestRulesFormProps> = ({ rules, onSave, load
         {loading ? 'Setting Rules...' : 'Set Contest Rules'}
       </button>
     </form>
+  );
+};
+
+// Blacklist Form Component
+interface BlacklistFormProps {
+  blacklist: ProjectBlacklist | null;
+  onSave: (blacklist: ProjectBlacklist) => void;
+  loading?: boolean;
+}
+
+const BlacklistForm: React.FC<BlacklistFormProps> = ({ blacklist, onSave, loading = false }) => {
+  const [emails, setEmails] = useState<string>(blacklist?.emails.join('\n') || '');
+  const [names, setNames] = useState<string>(blacklist?.names.join('\n') || '');
+  const [phones, setPhones] = useState<string>(blacklist?.phones.join('\n') || '');
+
+  const handleSave = () => {
+    const cleanEmails = emails.split('\n').map(e => e.trim()).filter(e => e.length > 0);
+    const cleanNames = names.split('\n').map(n => n.trim()).filter(n => n.length > 0);
+    const cleanPhones = phones.split('\n').map(p => p.trim()).filter(p => p.length > 0);
+
+    const blacklistData: ProjectBlacklist = {
+      emails: cleanEmails,
+      names: cleanNames,
+      phones: cleanPhones
+    };
+
+    onSave(blacklistData);
+  };
+
+  return (
+    <div className="blacklist-form-container">
+      <div className="blacklist-form-header">
+        <h3>Configure Entry Blacklist</h3>
+        <p className="form-description">
+          Add entries (one per line) that should be automatically filtered out during data processing.
+          Leave sections empty if not needed.
+        </p>
+      </div>
+
+      <div className="blacklist-form-grid">
+        <div className="blacklist-input-section">
+          <label htmlFor="blacklist-emails">
+            <span className="input-label">📧 Blocked Emails</span>
+            <span className="input-hint">One email per line (e.g., spam@example.com)</span>
+          </label>
+          <textarea
+            id="blacklist-emails"
+            value={emails}
+            onChange={(e) => setEmails(e.target.value)}
+            placeholder="test@example.com&#10;spam@domain.com&#10;fake@email.com"
+            rows={6}
+            className="blacklist-textarea"
+          />
+        </div>
+
+        <div className="blacklist-input-section">
+          <label htmlFor="blacklist-names">
+            <span className="input-label">👤 Blocked Names</span>
+            <span className="input-hint">One full name per line (e.g., John Doe)</span>
+          </label>
+          <textarea
+            id="blacklist-names"
+            value={names}
+            onChange={(e) => setNames(e.target.value)}
+            placeholder="Test User&#10;John Doe&#10;Jane Smith"
+            rows={6}
+            className="blacklist-textarea"
+          />
+        </div>
+
+        <div className="blacklist-input-section">
+          <label htmlFor="blacklist-phones">
+            <span className="input-label">📞 Blocked Phone Numbers</span>
+            <span className="input-hint">One phone per line (any format accepted)</span>
+          </label>
+          <textarea
+            id="blacklist-phones"
+            value={phones}
+            onChange={(e) => setPhones(e.target.value)}
+            placeholder="555-555-5555&#10;(123) 456-7890&#10;000-000-0000"
+            rows={6}
+            className="blacklist-textarea"
+          />
+        </div>
+      </div>
+
+      <div className="blacklist-form-actions">
+        <button
+          onClick={handleSave}
+          disabled={loading}
+          className="save-blacklist-btn primary"
+        >
+          {loading ? 'Saving Blacklist...' : 'Save Blacklist'}
+        </button>
+        
+        <div className="blacklist-form-info">
+          <p className="info-text">
+            <strong>💡 Tip:</strong> The blacklist is applied during data processing. 
+            Entries matching any criteria will be filtered out and counted in statistics.
+          </p>
+        </div>
+      </div>
+    </div>
   );
 };
 

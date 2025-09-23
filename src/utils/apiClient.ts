@@ -39,6 +39,12 @@ export interface ContestRules {
   };
 }
 
+export interface ProjectBlacklist {
+  emails: string[];
+  names: string[];
+  phones: string[];
+}
+
 export interface S3Bucket {
   name: string;
   creation_date: string;
@@ -227,6 +233,23 @@ class ContestManagerAPI {
       // Return null if no rules exist (404 error expected)
       return null;
     }
+  }
+
+  // Blacklist Management
+  async getProjectBlacklist(bucketName: string, projectId: string): Promise<ProjectBlacklist | null> {
+    try {
+      return await this.request(`/blacklist/${bucketName}/${projectId}`);
+    } catch (error) {
+      // Return null if no blacklist exists (404 error expected)
+      return null;
+    }
+  }
+
+  async setProjectBlacklist(bucketName: string, projectId: string, blacklist: ProjectBlacklist): Promise<void> {
+    return this.request(`/blacklist/${bucketName}/${projectId}`, {
+      method: 'POST',
+      body: JSON.stringify(blacklist),
+    });
   }
 
   // Data Processing (Updated for new on-demand system)

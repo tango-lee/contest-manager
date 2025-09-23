@@ -1829,3 +1829,269 @@ input:focus {
     justify-content: center;
   }
 }
+
+/* Blacklist Management Styles */
+.blacklist-management {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin: 2rem 0;
+  overflow: hidden;
+}
+
+.blacklist-form-container {
+  padding: 2rem;
+}
+
+.blacklist-form-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.blacklist-form-header h3 {
+  color: #dc3545;
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+}
+
+.blacklist-form-header .form-description {
+  color: #6c757d;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.blacklist-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.blacklist-input-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.blacklist-input-section label {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0.5rem;
+}
+
+.blacklist-input-section .input-label {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 0.25rem;
+  font-size: 1rem;
+}
+
+.blacklist-input-section .input-hint {
+  font-size: 0.875rem;
+  color: #6c757d;
+  font-style: italic;
+}
+
+.blacklist-textarea {
+  width: 100%;
+  min-height: 150px;
+  padding: 0.75rem;
+  border: 2px solid #dee2e6;
+  border-radius: 8px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  resize: vertical;
+  transition: border-color 0.2s ease;
+}
+
+.blacklist-textarea:focus {
+  outline: none;
+  border-color: #dc3545;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
+.blacklist-textarea::placeholder {
+  color: #adb5bd;
+  font-style: italic;
+}
+
+.blacklist-form-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.save-blacklist-btn {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 200px;
+}
+
+.save-blacklist-btn:hover:not(:disabled) {
+  background: #c82333;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.save-blacklist-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.blacklist-form-info {
+  text-align: center;
+  max-width: 500px;
+}
+
+.blacklist-form-info .info-text {
+  color: #6c757d;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Saved Blacklist Display */
+.blacklist-saved-display {
+  padding: 2rem;
+}
+
+.saved-blacklist-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.saved-blacklist-header h3 {
+  color: #28a745;
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.edit-blacklist-btn {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.edit-blacklist-btn:hover {
+  background: #5a6268;
+  transform: translateY(-1px);
+}
+
+.blacklist-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.blacklist-section {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border-left: 4px solid #dc3545;
+}
+
+.blacklist-section h4 {
+  color: #495057;
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+}
+
+.blacklist-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.blacklist-tag {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.blacklist-tag.email-tag {
+  background: #e3f2fd;
+  color: #1565c0;
+  border: 1px solid #bbdefb;
+}
+
+.blacklist-tag.name-tag {
+  background: #f3e5f5;
+  color: #7b1fa2;
+  border: 1px solid #e1bee7;
+}
+
+.blacklist-tag.phone-tag {
+  background: #e8f5e8;
+  color: #2e7d32;
+  border: 1px solid #c8e6c9;
+}
+
+.blacklist-items .no-items {
+  color: #6c757d;
+  font-style: italic;
+  padding: 0.5rem 0;
+}
+
+.blacklist-info {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.blacklist-info .info-text {
+  color: #856404;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Responsive Design for Blacklist */
+@media (max-width: 768px) {
+  .blacklist-form-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .blacklist-summary-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .saved-blacklist-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .blacklist-form-container,
+  .blacklist-saved-display {
+    padding: 1rem;
+  }
+}
