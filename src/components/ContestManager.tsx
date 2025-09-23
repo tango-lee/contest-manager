@@ -318,6 +318,29 @@ const ContestManager: React.FC = () => {
     }
   };
 
+  const downloadFilteredCSV = async () => {
+    try {
+      setLoading(prev => ({ ...prev, downloadCSV: true }));
+      
+      // Call the API to generate and download filtered CSV
+      const downloadUrl = await contestAPI.downloadFilteredCSV(selectedBucket, selectedProject);
+      
+      // Create a temporary link and trigger download
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `filtered_entries_${selectedBucket}_${selectedProject}_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+    } catch (error) {
+      console.error('Failed to download filtered CSV:', error);
+      alert('Failed to download filtered CSV: ' + error);
+    } finally {
+      setLoading(prev => ({ ...prev, downloadCSV: false }));
+    }
+  };
+
   const selectWinners = async () => {
     const numberOfWinners = parseInt(prompt('Number of winners to select:') || '1');
     try {
@@ -568,33 +591,177 @@ const ContestManager: React.FC = () => {
           <h2>📊 Validated Data Viewer</h2>
         </div>
 
-        {validatedFiles.length > 0 && (
-          <div className="validated-files">
-            <h3>📄 Eligible Contestants (/validated folder):</h3>
-            <div className="file-list">
-              {validatedFiles.map(file => (
-                <div key={file.key} className="file-item">
-                  <span className="file-name">{file.key}</span>
-                  <div className="file-actions">
-                    <button className="action-btn small">View</button>
+        {hasClientAndProject && (
+          <>
+            {/* Data Processing Controls */}
+            <div className="data-processing-controls">
+              <div className="processing-actions">
+                <button
+                  onClick={processData}
+                  disabled={!canProcessData || loading.processData}
+                  className="action-btn primary large"
+                >
+                  {loading.processData ? 'Processing...' : 'Process Raw Entries'}
+                </button>
+                
+                <button
+                  onClick={downloadFilteredCSV}
+                  disabled={!canProcessData || loading.downloadCSV}
+                  className="action-btn secondary large"
+                >
+                  {loading.downloadCSV ? 'Generating...' : 'Download Filtered CSV'}
+                </button>
+              </div>
+              
+              {processingStatus && (
+                <div className="processing-status">
+                  <div className={`status-indicator ${processingStatus.status}`}>
+                    <span className="status-text">
+                      Status: {processingStatus.status.toUpperCase()}
+                    </span>
+                    {processingStatus.message && (
+                      <span className="status-message">{processingStatus.message}</span>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Entry Statistics Cards */}
+            <div className="entry-statistics">
+              <div className="stats-grid">
+                <div className="stat-card raw-entries">
+                  <div className="stat-header">
+                    <h3>📥 Raw Entries</h3>
+                  </div>
+                  <div className="stat-content">
+                    <div className="stat-number">{rawEntries.length}</div>
+                    <div className="stat-label">Total Submissions</div>
+                    {lastRawSync && (
+                      <div className="stat-timestamp">
+                        Last sync: {new Date(lastRawSync).toLocaleString()}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="stat-card validated-entries">
+                  <div className="stat-header">
+                    <h3>✅ Validated Entries</h3>
+                  </div>
+                  <div className="stat-content">
+                    <div className="stat-number">
+                      {processingStatus?.stats?.total_processed || validatedFiles.length}
+                    </div>
+                    <div className="stat-label">Eligible Entries</div>
+                    {processingStatus?.stats && (
+                      <div className="stat-details">
+                        <div className="stat-breakdown">
+                          Unique: {processingStatus.stats.unique_entries || 'N/A'}
+                        </div>
+                        <div className="stat-breakdown">
+                          Duplicates: {processingStatus.stats.duplicates_removed || 'N/A'}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="stat-card processing-rate">
+                  <div className="stat-header">
+                    <h3>📊 Processing Rate</h3>
+                  </div>
+                  <div className="stat-content">
+                    <div className="stat-number">
+                      {processingStatus?.stats ? 
+                        `${Math.round((processingStatus.stats.total_processed / rawEntries.length) * 100)}%` : 
+                        '0%'
+                      }
+                    </div>
+                    <div className="stat-label">Entries Eligible</div>
+                    {processingStatus?.stats?.filtered_out && (
+                      <div className="stat-details">
+                        <div className="stat-breakdown error">
+                          Filtered out: {processingStatus.stats.filtered_out}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Validated Files List */}
+            {validatedFiles.length > 0 && (
+              <div className="validated-files">
+                <div className="files-header">
+                  <h3>📄 Validated Data Files</h3>
+                  <div className="bulk-actions">
                     <button 
-                      onClick={() => contestAPI.downloadFile(selectedBucket, selectedProject, file.key)}
-                      className="action-btn small"
+                      onClick={() => contestAPI.downloadValidatedZip(selectedBucket, selectedProject)}
+                      className="action-btn primary"
+                      disabled={loading.downloadZip}
                     >
-                      Download
+                      {loading.downloadZip ? 'Preparing...' : 'Download All as ZIP'}
                     </button>
                   </div>
                 </div>
-              ))}
-            </div>
-            <div className="bulk-actions">
-              <button 
-                onClick={() => contestAPI.downloadValidatedZip(selectedBucket, selectedProject)}
-                className="action-btn primary"
-              >
-                Download All Eligible
-              </button>
-              <button className="action-btn">Export Validated ZIP</button>
+                
+                <div className="file-list">
+                  {validatedFiles.map(file => (
+                    <div key={file.key} className="file-item">
+                      <div className="file-info">
+                        <span className="file-name">{file.key.split('/').pop()}</span>
+                        <div className="file-meta">
+                          <span className="file-size">{file.size ? `${Math.round(file.size / 1024)}KB` : 'Unknown size'}</span>
+                          <span className="file-date">
+                            {file.lastModified ? new Date(file.lastModified).toLocaleDateString() : 'Unknown date'}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="file-actions">
+                        <button 
+                          onClick={() => contestAPI.downloadFile(selectedBucket, selectedProject, file.key)}
+                          className="action-btn small primary"
+                          disabled={loading.downloadFile}
+                        >
+                          Download CSV
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* No Data State */}
+            {validatedFiles.length === 0 && !loading.processData && (
+              <div className="no-data-state">
+                <div className="no-data-content">
+                  <div className="no-data-icon">📊</div>
+                  <h3>No Validated Data Yet</h3>
+                  <p>Process your raw entries to generate validated data files and view entry statistics.</p>
+                  {rawEntries.length > 0 && (
+                    <button
+                      onClick={processData}
+                      className="action-btn primary large"
+                      disabled={!canProcessData}
+                    >
+                      Process {rawEntries.length} Raw Entries
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
+        {!hasClientAndProject && (
+          <div className="no-selection-state">
+            <div className="no-selection-content">
+              <div className="no-selection-icon">📋</div>
+              <h3>Select Client & Project</h3>
+              <p>Choose a client and project above to view validated data and entry statistics.</p>
             </div>
           </div>
         )}
