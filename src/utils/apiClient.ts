@@ -268,7 +268,7 @@ class ContestManagerAPI {
     return this.request(`/data/status/${bucketName}/${projectName}`);
   }
 
-  async downloadFilteredCSV(bucketName: string, projectName: string) {
+  async downloadFilteredCSV(bucketName: string, projectName: string): Promise<string> {
     // Use new on-demand processing for CSV downloads
     const response = await this.request<{ download_url: string }>('/data/process', {
       method: 'POST',
@@ -280,7 +280,7 @@ class ContestManagerAPI {
     });
     
     if (response.download_url) {
-      window.location.href = response.download_url;
+      return response.download_url;
     } else {
       throw new Error('No download URL received from processing');
     }
