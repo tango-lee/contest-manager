@@ -799,13 +799,13 @@ const ContestManager: React.FC = () => {
                       {processingStatus?.eligible_contestants || validatedFiles.length}
                     </div>
                     <div className="stat-label">Eligible Entries</div>
-                    {processingStatus && (
+                    {processingStatus?.filter_statistics && (
                       <div className="stat-details">
                         <div className="stat-breakdown">
-                          Raw Entries: {processingStatus.raw_entries || 'N/A'}
+                          Raw Entries: {processingStatus.filter_statistics.total_entries || 'N/A'}
                         </div>
                         <div className="stat-breakdown">
-                          Duplicates: {processingStatus.duplicates_removed || 'N/A'}
+                          Duplicates: {processingStatus.filter_statistics.duplicate_filtered || 'N/A'}
                         </div>
                       </div>
                     )}
@@ -818,16 +818,19 @@ const ContestManager: React.FC = () => {
                   </div>
                   <div className="stat-content">
                     <div className="stat-number">
-                      {processingStatus ? 
-                        `${Math.round((processingStatus.eligible_contestants / rawEntries.length) * 100)}%` : 
+                      {processingStatus?.filter_statistics ? 
+                        `${Math.round((processingStatus.filter_statistics.valid_entries / processingStatus.filter_statistics.total_entries) * 100)}%` : 
                         '0%'
                       }
                     </div>
                     <div className="stat-label">Entries Eligible</div>
-                    {processingStatus?.rules_violations && (
+                    {processingStatus?.filter_statistics && (
                       <div className="stat-details">
                         <div className="stat-breakdown error">
-                          Rules Violations: {processingStatus.rules_violations}
+                          Blacklisted: {processingStatus.filter_statistics.blacklist_filtered}
+                        </div>
+                        <div className="stat-breakdown error">
+                          Date Filtered: {processingStatus.filter_statistics.date_filtered}
                         </div>
                       </div>
                     )}
@@ -860,7 +863,7 @@ const ContestManager: React.FC = () => {
                         <div className="file-meta">
                           <span className="file-size">{file.size ? `${Math.round(file.size / 1024)}KB` : 'Unknown size'}</span>
                           <span className="file-date">
-                            {file.lastModified ? new Date(file.lastModified).toLocaleDateString() : 'Unknown date'}
+                            {file.last_modified ? new Date(file.last_modified).toLocaleDateString() : 'Unknown date'}
                           </span>
                         </div>
                       </div>

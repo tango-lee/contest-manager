@@ -75,11 +75,18 @@ export interface Winner {
 
 export interface ProcessingStatus {
   status: 'pending' | 'processing' | 'completed' | 'error';
-  raw_entries: number;
-  duplicates_removed: number;
-  rules_violations: number;
   eligible_contestants: number;
+  last_processed?: string;
   message?: string;
+  filter_statistics?: {
+    total_entries: number;
+    blacklist_filtered: number;
+    date_filtered: number;
+    state_filtered: number;
+    age_filtered: number;
+    duplicate_filtered: number;
+    valid_entries: number;
+  };
 }
 
 class ContestManagerAPI {
@@ -179,7 +186,7 @@ class ContestManagerAPI {
   // Raw Entries Management
   async getRawEntriesCount(bucketName: string, projectName: string): Promise<number> {
     try {
-      const response = await this.request(`/data/raw-count/${bucketName}/${projectName}`);
+      const response = await this.request<{ count: number }>(`/data/raw-count/${bucketName}/${projectName}`);
       return response.count || 0;
     } catch (error) {
       console.warn('Failed to get raw entries count:', error);
