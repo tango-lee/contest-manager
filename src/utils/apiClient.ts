@@ -154,8 +154,10 @@ class ContestManagerAPI {
     projectHandle: string;
     projectName: string;
     clientName: string;
+    flight_start_date?: string;
+    flight_end_date?: string;
   }) {
-    return this.request('/buckets/create', {
+    return this.request('/clients/create', {
       method: 'POST',
       body: JSON.stringify({ 
         bucket_name: bucketName,
@@ -191,26 +193,17 @@ class ContestManagerAPI {
 
   // Raw entries from /{project-id}/entries/raw/
   async getRawEntries(bucketName: string, projectId: string): Promise<any[]> {
-    return this.request<any[]>(`/s3/${bucketName}/${projectId}/entries/raw`);
+    return this.request<any[]>(`/data/raw/${bucketName}/${projectId}`);
   }
 
-  async getRawEntriesCount(bucketName: string, projectId: string): Promise<number> {
-    const response = await this.request<{ count: number }>(`/s3/${bucketName}/${projectId}/entries/raw/count`);
-    return response.count || 0;
-  }
-
-  // Validated entries from /{project-id}/entries/validated/
-  async getValidatedEntries(bucketName: string, projectId: string): Promise<S3File[]> {
-    return this.request(`/s3/${bucketName}/${projectId}/entries/validated`);
-  }
-
+  // File Downloads (Updated for new AWS endpoints)
   async downloadFile(bucketName: string, projectName: string, fileName: string) {
-    const response = await this.request<{ download_url: string }>(`/s3/download/${bucketName}/${projectName}/${fileName}`);
+    const response = await this.request<{ download_url: string }>(`/files/download/${bucketName}/${projectName}/${fileName}`);
     window.location.href = response.download_url;
   }
 
   async downloadValidatedZip(bucketName: string, projectName: string) {
-    const response = await this.request<{ download_url: string }>(`/s3/export/${bucketName}/${projectName}/validated`);
+    const response = await this.request<{ download_url: string }>(`/files/export/${bucketName}/${projectName}/validated`);
     window.location.href = response.download_url;
   }
 
@@ -291,8 +284,8 @@ class ContestManagerAPI {
   }
 
   async exportWinners(bucketName: string, projectName: string) {
-    const response = await this.request<{ csv_url: string }>(`/winners/export/${bucketName}/${projectName}`);
-    window.location.href = response.csv_url;
+    const response = await this.request<{ download_url: string }>(`/winners/export/${bucketName}/${projectName}`);
+    window.location.href = response.download_url;
   }
 
   // Reports & Integration
