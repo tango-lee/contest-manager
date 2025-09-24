@@ -601,6 +601,13 @@ const ContestManager: React.FC = () => {
                         </div>
                       </div>
                     </div>
+
+                    <div className="rules-info">
+                      <p className="info-text">
+                        <strong>Note:</strong> These contest rules will be automatically applied when processing raw entries. 
+                        Entries that don't meet the eligibility criteria (age, state, dates) will be filtered out and counted in the processing statistics.
+                      </p>
+                    </div>
                   </div>
                 )}
               </div>

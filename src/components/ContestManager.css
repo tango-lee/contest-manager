@@ -939,6 +939,20 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+.rules-info {
+  background: rgba(0, 212, 255, 0.1);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.rules-info .info-text {
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  line-height: 1.5;
+}
+
 .winner-rule-saved .rule-count {
   color: #00d4ff;
   font-weight: 700;
@@ -1569,7 +1583,7 @@ input:focus {
 }
 
 .validated-data .section-header {
-  border-bottom: 2px solid #333;
+  border-bottom: 2px solid rgba(0, 212, 255, 0.3);
 }
 
 /* Data Processing Controls */
@@ -1832,9 +1846,9 @@ input:focus {
 
 /* Blacklist Management Styles */
 .blacklist-management {
-  background: #fff;
+  background: #1a1a1a;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   margin: 2rem 0;
   overflow: hidden;
 }
@@ -1849,13 +1863,13 @@ input:focus {
 }
 
 .blacklist-form-header h3 {
-  color: #dc3545;
+  color: #00d4ff;
   margin-bottom: 0.5rem;
   font-size: 1.5rem;
 }
 
 .blacklist-form-header .form-description {
-  color: #6c757d;
+  color: rgba(255, 255, 255, 0.7);
   margin: 0;
   line-height: 1.5;
 }
@@ -1880,14 +1894,14 @@ input:focus {
 
 .blacklist-input-section .input-label {
   font-weight: 600;
-  color: #495057;
+  color: #ffffff;
   margin-bottom: 0.25rem;
   font-size: 1rem;
 }
 
 .blacklist-input-section .input-hint {
   font-size: 0.875rem;
-  color: #6c757d;
+  color: rgba(255, 255, 255, 0.6);
   font-style: italic;
 }
 
@@ -1895,8 +1909,10 @@ input:focus {
   width: 100%;
   min-height: 150px;
   padding: 0.75rem;
-  border: 2px solid #dee2e6;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
   font-size: 0.875rem;
   line-height: 1.4;
@@ -1906,8 +1922,8 @@ input:focus {
 
 .blacklist-textarea:focus {
   outline: none;
-  border-color: #dc3545;
-  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+  border-color: #00d4ff;
+  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
 }
 
 .blacklist-textarea::placeholder {
@@ -1923,8 +1939,8 @@ input:focus {
 }
 
 .save-blacklist-btn {
-  background: #dc3545;
-  color: white;
+  background: #00d4ff;
+  color: #0f0f0f;
   border: none;
   padding: 0.75rem 2rem;
   border-radius: 8px;
@@ -1936,9 +1952,9 @@ input:focus {
 }
 
 .save-blacklist-btn:hover:not(:disabled) {
-  background: #c82333;
+  background: #00b8e6;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
 }
 
 .save-blacklist-btn:disabled {
@@ -1963,6 +1979,9 @@ input:focus {
 /* Saved Blacklist Display */
 .blacklist-saved-display {
   padding: 2rem;
+  background: rgba(0, 212, 255, 0.1);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  border-radius: 12px;
 }
 
 .saved-blacklist-header {
@@ -1971,11 +1990,11 @@ input:focus {
   align-items: center;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
-  border-bottom: 2px solid #e9ecef;
+  border-bottom: 1px solid rgba(0, 212, 255, 0.3);
 }
 
 .saved-blacklist-header h3 {
-  color: #28a745;
+  color: #00d4ff;
   margin: 0;
   font-size: 1.5rem;
 }
@@ -2004,14 +2023,14 @@ input:focus {
 }
 
 .blacklist-section {
-  background: #f8f9fa;
+  background: rgba(255, 255, 255, 0.05);
   padding: 1.5rem;
   border-radius: 8px;
-  border-left: 4px solid #dc3545;
+  border-left: 4px solid #00d4ff;
 }
 
 .blacklist-section h4 {
-  color: #495057;
+  color: #ffffff;
   margin: 0 0 1rem 0;
   font-size: 1.1rem;
 }
@@ -2053,21 +2072,21 @@ input:focus {
 }
 
 .blacklist-items .no-items {
-  color: #6c757d;
+  color: rgba(255, 255, 255, 0.6);
   font-style: italic;
   padding: 0.5rem 0;
 }
 
 .blacklist-info {
-  background: #fff3cd;
-  border: 1px solid #ffeaa7;
+  background: rgba(0, 212, 255, 0.1);
+  border: 1px solid rgba(0, 212, 255, 0.3);
   border-radius: 8px;
   padding: 1rem;
   margin-top: 1rem;
 }
 
 .blacklist-info .info-text {
-  color: #856404;
+  color: rgba(255, 255, 255, 0.9);
   margin: 0;
   line-height: 1.5;
 }
