@@ -118,17 +118,38 @@ The app includes development mode simulation for UI testing:
 
 ## 🚀 Production Deployment
 
-### Environment Variables:
-```bash
-REACT_APP_API_BASE_URL=https://your-api-gateway-url
-REACT_APP_API_KEY=your-api-key
-REACT_APP_ENVIRONMENT=production
-```
+### **Live Deployment (AWS Amplify):**
+- **URL:** `https://d33zcw2d7n7hnx.amplifyapp.com`
+- **App ID:** `d33zcw2d7n7hnx`
+- **Status:** ✅ LIVE (Job #12 - SUCCESS)
+- **Auto-Deploy:** GitHub `master` branch → Amplify
 
-### Build Process:
+### **Backend API Integration:**
+- **API Base URL:** `https://0gt6s4bqo5.execute-api.us-east-1.amazonaws.com/prod`
+- **API Gateway ID:** `0gt6s4bqo5`
+- **Region:** `us-east-1`
+- **Account:** `761386521789`
+
+### **UI Button → AWS Lambda Mapping:**
+| UI Feature | API Endpoint | Lambda Function |
+|---|---|---|
+| **Client Dropdown** | `GET /buckets/list` | `client-validator-prod` |
+| **Manage Blacklist** | `POST /blacklist/{bucket}/{project}` | `blacklist-management-prod` |
+| **Process Data** | `POST /data/process` | `data-processing-prod` |
+| **Select Winners** | `POST /winners/select` | `winner-management-prod` |
+| **Contest Rules** | `POST /contest-rules/{bucket}/{project}` | `contest-rules-prod` |
+| **Download Files** | `GET /files/download/{bucket}/{project}/{file}` | `file-management-prod` |
+
+### **Deployment Commands:**
 ```bash
-npm run build
-# Creates optimized build/ folder (~1.1MB)
+# Deploy to Amplify (auto-triggered)
+git push origin master
+
+# Manual Amplify build trigger
+aws amplify start-job --app-id d33zcw2d7n7hnx --branch-name master --job-type RELEASE
+
+# Local development
+npm install && npm start  # http://localhost:3000
 ```
 
 ## 🎯 Perfect For Customer Service Teams:
