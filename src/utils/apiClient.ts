@@ -278,20 +278,29 @@ class ContestManagerAPI {
   }
 
   async downloadFilteredCSV(bucketName: string, projectName: string): Promise<string> {
-    // Use new on-demand processing for CSV downloads
-    const response = await this.request<{ download_url: string }>('/data/process', {
-      method: 'POST',
-      body: JSON.stringify({ 
-        bucket_name: bucketName, 
-        project_name: projectName,
-        processing_type: 'temp'
-      }),
-    });
-    
-    if (response.download_url) {
-      return response.download_url;
-    } else {
-      throw new Error('No download URL received from processing');
+    try {
+      // Use new on-demand processing for CSV downloads
+      const response = await this.request<{ download_url?: string; downloadUrl?: string; url?: string }>('/data/process', {
+        method: 'POST',
+        body: JSON.stringify({ 
+          bucket_name: bucketName, 
+          project_name: projectName,
+          processing_type: 'temp'
+        }),
+      });
+      
+      // Check for download URL in various possible field names
+      const downloadUrl = response.download_url || response.downloadUrl || response.url;
+      
+      if (downloadUrl) {
+        return downloadUrl;
+      } else {
+        console.error('API Response:', response);
+        throw new Error('No download URL received from processing. Response: ' + JSON.stringify(response));
+      }
+    } catch (error) {
+      console.error('CSV download API error:', error);
+      throw error;
     }
   }
 

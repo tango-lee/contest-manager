@@ -359,6 +359,17 @@ const ContestManager: React.FC = () => {
     try {
       setLoading(prev => ({ ...prev, downloadCSV: true }));
       
+      // Check if we have processed data first
+      if (!processingStatus || processingStatus.status !== 'completed') {
+        alert('No processed data available. Please process the data first before downloading.');
+        return;
+      }
+      
+      if (!processingStatus.eligible_contestants || processingStatus.eligible_contestants === 0) {
+        alert('No eligible entries found. Cannot generate CSV.');
+        return;
+      }
+      
       // Call the API to generate and download filtered CSV with contest rules info
       const downloadUrl = await contestAPI.downloadFilteredCSV(selectedBucket, selectedProject);
       
@@ -372,7 +383,13 @@ const ContestManager: React.FC = () => {
       
     } catch (error) {
       console.error('Failed to download entries:', error);
-      alert('Failed to download entries: ' + error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      
+      if (errorMessage.includes('No download URL received')) {
+        alert('Unable to generate download link. The data processing service may not be available. Please try processing the data again or contact support.');
+      } else {
+        alert('Failed to download entries: ' + errorMessage);
+      }
     } finally {
       setLoading(prev => ({ ...prev, downloadCSV: false }));
     }
@@ -846,7 +863,7 @@ const ContestManager: React.FC = () => {
                   </div>
                   <div className="stat-content">
                     <div className="stat-number">
-                      {processingStatus?.eligible_contestants || validatedFiles.length}
+                      {processingStatus?.status === 'completed' ? (processingStatus?.eligible_contestants || validatedFiles.length) : 0}
                     </div>
                     <div className="stat-label">Eligible Entries</div>
                     {processingStatus?.filter_statistics && (
@@ -871,7 +888,7 @@ const ContestManager: React.FC = () => {
                       // Get contest status based on flight dates
                       const getContestStatus = () => {
                         if (!contestRules?.flight_start_date || !contestRules?.flight_end_date) {
-                          return { status: 'Not Configured', percentage: 0, icon: '⚙️', color: 'gray' };
+                          return { status: 'Contest Dates Not Set', percentage: null, icon: '📅', color: 'gray', detail: 'Configure flight dates in Contest Rules' };
                         }
 
                         const now = new Date();
@@ -880,13 +897,12 @@ const ContestManager: React.FC = () => {
                         
                         // Before contest starts
                         if (now < startDate) {
-                          const daysUntilStart = Math.ceil((startDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
                           return { 
-                            status: 'Upcoming', 
-                            percentage: 0, 
+                            status: 'Upcoming Contest', 
+                            percentage: null, 
                             icon: '⏳', 
                             color: 'blue',
-                            detail: `Starts in ${daysUntilStart} day${daysUntilStart !== 1 ? 's' : ''}`
+                            detail: `Starts ${startDate.toLocaleDateString()}`
                           };
                         }
                         
@@ -904,11 +920,11 @@ const ContestManager: React.FC = () => {
                             };
                           } else {
                             return { 
-                              status: 'Ready for Winners', 
-                              percentage: 100, 
-                              icon: '🏆', 
+                              status: 'Closed Contest', 
+                              percentage: null, 
+                              icon: '🏁', 
                               color: 'gold',
-                              detail: 'Contest ended - select winners'
+                              detail: `Ended ${endDate.toLocaleDateString()}`
                             };
                           }
                         }
@@ -922,9 +938,9 @@ const ContestManager: React.FC = () => {
                         return { 
                           status: 'Live Contest', 
                           percentage, 
-                          icon: '🚀', 
+                          icon: '🔴', 
                           color: 'cyan',
-                          detail: `${daysRemaining} day${daysRemaining !== 1 ? 's' : ''} remaining`
+                          detail: `Ends ${endDate.toLocaleDateString()}`
                         };
                       };
 
@@ -936,7 +952,7 @@ const ContestManager: React.FC = () => {
                             {status.icon}
                           </div>
                           <div className="stat-number contest-percentage">
-                            {status.percentage}%
+                            {status.percentage !== null ? `${status.percentage}%` : '—'}
                           </div>
                           <div className="stat-label contest-status-label">
                             {status.status}
