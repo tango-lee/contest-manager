@@ -130,7 +130,7 @@
 
 .disabled-badge {
   background: #666;
-  color: #ccc;
+  color: #ffffff;
   padding: 0.5rem 1rem;
   border-radius: 20px;
   font-size: 0.8rem;
@@ -172,7 +172,7 @@
 
 .action-btn:disabled {
   background: #333;
-  color: #666;
+  color: #ffffff;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
@@ -180,7 +180,7 @@
 
 .action-btn.primary:disabled {
   background: #333;
-  color: #666;
+  color: #ffffff;
   cursor: not-allowed;
   box-shadow: none;
 }
@@ -297,7 +297,7 @@
 .remove-client-btn {
   background: none;
   border: none;
-  color: #999;
+  color: #ffffff;
   font-size: 1.5rem;
   cursor: pointer;
   padding: 0;
@@ -335,7 +335,7 @@
 .control-group label {
   font-weight: 600;
   min-width: 100px;
-  color: #cccccc;
+  color: #ffffff;
   white-space: nowrap;
 }
 
@@ -369,7 +369,7 @@
 
 .control-group select:disabled {
   background: #111;
-  color: #666;
+  color: #ffffff;
   border-color: #222;
   cursor: not-allowed;
 }
@@ -421,7 +421,7 @@
 
 .context-item.disabled .context-label,
 .context-item.disabled .context-value {
-  color: #666;
+  color: #ffffff;
 }
 
 .context-label {
@@ -441,7 +441,7 @@
 
 .timestamp-text {
   font-size: 0.75rem;
-  color: #999;
+  color: #ffffff;
   font-weight: 300;
   margin-left: 0.5rem;
 }
@@ -471,7 +471,7 @@
 .summary-card .label, .stat-card .label {
   display: block;
   font-size: 0.9rem;
-  color: #cccccc;
+  color: #ffffff;
   font-weight: 500;
 }
 
@@ -502,7 +502,7 @@
 .form-group label {
   font-weight: 600;
   margin-bottom: 0.5rem;
-  color: #cccccc;
+  color: #ffffff;
 }
 
 .form-group input {
@@ -531,7 +531,7 @@
 }
 
 .age-inputs span {
-  color: #cccccc;
+  color: #ffffff;
   font-weight: 500;
 }
 
@@ -594,7 +594,7 @@
 }
 
 .rule-text {
-  color: #cccccc;
+  color: #ffffff;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -787,7 +787,7 @@
 }
 
 .state-name {
-  color: #cccccc;
+  color: #ffffff;
   font-size: 0.85rem;
   flex: 1;
 }
@@ -901,7 +901,7 @@
 }
 
 .rule-label {
-  color: #cccccc;
+  color: #ffffff;
   font-weight: 600;
   font-size: 0.9rem;
 }
@@ -960,7 +960,7 @@
 }
 
 .winner-rule-saved .rule-text {
-  color: #cccccc;
+  color: #ffffff;
   font-weight: 600;
   font-size: 0.85rem;
   text-transform: uppercase;
@@ -1170,7 +1170,7 @@
   background: none;
   border: none;
   font-size: 2rem;
-  color: #666666;
+  color: #ffffff;
   cursor: pointer;
   width: 40px;
   height: 40px;
@@ -1193,7 +1193,7 @@
 
 .modal-body {
   padding: 2rem;
-  color: #666666;
+  color: #ffffff;
   text-align: center;
   flex: 1;
   overflow-y: auto;
@@ -1239,7 +1239,7 @@
 }
 
 .bucket-prefix {
-  color: #666666;
+  color: #ffffff;
   font-weight: 600;
 }
 
@@ -1270,7 +1270,7 @@
 .input-instructions p {
   margin: 0.1rem 0;
   font-size: 0.9rem;
-  color: #555555;
+  color: #ffffff;
 }
 
 .modal-divider {
@@ -1322,7 +1322,7 @@
 .date-input-group label {
   font-size: 0.9rem;
   font-weight: 600;
-  color: #555555;
+  color: #ffffff;
 }
 
 .date-input {
@@ -1336,7 +1336,7 @@
 
 .time-note {
   font-size: 0.75rem;
-  color: #888888;
+  color: #ffffff;
   font-style: italic;
   margin-top: 0.25rem;
 }
@@ -1369,7 +1369,7 @@
 
 .modal-btn.secondary {
   background: #f5f5f5;
-  color: #666666;
+  color: #ffffff;
 }
 
 .modal-btn.secondary:hover {
@@ -1634,7 +1634,7 @@ input:focus {
 }
 
 .status-message {
-  color: #888;
+  color: #ffffff;
   font-size: 0.9rem;
 }
 
@@ -1690,14 +1690,14 @@ input:focus {
 
 .stat-label {
   font-size: 0.9rem;
-  color: #888;
+  color: #ffffff;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .stat-timestamp {
   font-size: 0.8rem;
-  color: #666;
+  color: #ffffff;
   font-style: italic;
 }
 
@@ -1710,7 +1710,7 @@ input:focus {
 
 .stat-breakdown {
   font-size: 0.85rem;
-  color: #aaa;
+  color: #ffffff;
 }
 
 .stat-breakdown.error {
@@ -1775,7 +1775,7 @@ input:focus {
   display: flex;
   gap: 1rem;
   font-size: 0.85rem;
-  color: #888;
+  color: #ffffff;
 }
 
 .file-actions {
@@ -1788,7 +1788,7 @@ input:focus {
 .no-selection-state {
   text-align: center;
   padding: 4rem 2rem;
-  color: #888;
+  color: #ffffff;
 }
 
 .no-data-content,
@@ -1816,6 +1816,78 @@ input:focus {
   margin: 0 0 2rem 0;
   font-size: 1.1rem;
   line-height: 1.6;
+}
+
+/* Contest Rules Applied UI Display */
+.contest-rules-applied {
+  background: rgba(0, 212, 255, 0.1);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+}
+
+.contest-rules-applied h4 {
+  color: #00d4ff;
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.rules-summary, .blacklist-summary, .filtering-results {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.rule-item, .filter-item, .result-item {
+  color: #ffffff;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.result-item.error {
+  color: #ff6b6b;
+}
+
+.rule-item strong, .filter-item strong, .result-item strong {
+  color: #00d4ff;
+  font-weight: 600;
+}
+
+/* Contest Status Styling */
+.contest-status-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.contest-status-icon.blue { color: #3b82f6; }
+.contest-status-icon.cyan { color: #00d4ff; }
+.contest-status-icon.gold { color: #fbbf24; }
+.contest-status-icon.green { color: #10b981; }
+.contest-status-icon.gray { color: #6b7280; }
+
+.contest-percentage {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #00d4ff;
+  margin: 0.5rem 0;
+}
+
+.contest-status-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+}
+
+.contest-status-detail {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-style: italic;
+  text-align: center;
 }
 
 /* Additional Responsive Styles for Validated Data Viewer */
@@ -1847,14 +1919,20 @@ input:focus {
 /* Blacklist Management Styles */
 .blacklist-management {
   background: #1a1a1a;
+  margin: 0;
+  padding: 0;
+}
+
+.blacklist-form {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2rem;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  margin: 2rem 0;
-  overflow: hidden;
+  margin-top: 2rem;
 }
 
 .blacklist-form-container {
-  padding: 2rem;
+  padding: 0;
 }
 
 .blacklist-form-header {
@@ -1927,7 +2005,7 @@ input:focus {
 }
 
 .blacklist-textarea::placeholder {
-  color: #adb5bd;
+  color: #ffffff;
   font-style: italic;
 }
 
@@ -1970,7 +2048,7 @@ input:focus {
 }
 
 .blacklist-form-info .info-text {
-  color: #6c757d;
+  color: #ffffff;
   font-size: 0.875rem;
   line-height: 1.5;
   margin: 0;
@@ -1982,6 +2060,7 @@ input:focus {
   background: rgba(0, 212, 255, 0.1);
   border: 1px solid rgba(0, 212, 255, 0.3);
   border-radius: 12px;
+  margin-top: 2rem;
 }
 
 .saved-blacklist-header {
@@ -2000,7 +2079,7 @@ input:focus {
 }
 
 .edit-blacklist-btn {
-  background: #6c757d;
+  background: #ff1493;
   color: white;
   border: none;
   padding: 0.5rem 1rem;
@@ -2011,7 +2090,7 @@ input:focus {
 }
 
 .edit-blacklist-btn:hover {
-  background: #5a6268;
+  background: #e6127f;
   transform: translateY(-1px);
 }
 

@@ -102,7 +102,8 @@
 }
 
 .user-info {
-  display: flex;
+  display: none;
+  /* Hidden - keeping Monday.com auth functionality but removing UI bar */
   align-items: center;
   justify-content: flex-end;
   padding: 0.5rem 1rem;

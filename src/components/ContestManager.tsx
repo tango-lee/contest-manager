@@ -184,9 +184,15 @@ const ContestManager: React.FC = () => {
   };
 
   const createNewBucket = async () => {
-    if (!clientName.trim() || !isValidClientName(clientName) || !projectHandle.trim() || !isValidProjectHandle(projectHandle)) return;
+    // For new client: need client name validation
+    // For new project: only need project handle validation
+    if (modalType === 'client') {
+      if (!clientName.trim() || !isValidClientName(clientName) || !projectHandle.trim() || !isValidProjectHandle(projectHandle)) return;
+    } else {
+      if (!projectHandle.trim() || !isValidProjectHandle(projectHandle)) return;
+    }
     
-    const fullBucketName = getFullBucketName();
+    const fullBucketName = modalType === 'client' ? getFullBucketName() : selectedBucket;
     const projectName = `project-${projectHandle.padStart(4, '0')}`;
     
     try {
@@ -196,7 +202,7 @@ const ContestManager: React.FC = () => {
       const projectData = {
         projectHandle: projectHandle,
         projectName: projectName,
-        clientName: clientName,
+        clientName: modalType === 'client' ? clientName : selectedBucket?.replace('sweepstakes-', ''),
         flightStartDate: flightStartDate + 'T00:00:00',
         flightEndDate: flightEndDate + 'T23:59:59'
       };
@@ -209,17 +215,20 @@ const ContestManager: React.FC = () => {
       
       // Wait 2 seconds to show success message, then auto-select and close
       setTimeout(async () => {
-        // PRODUCTION MODE: Reload real data from AWS
-        // Reload buckets from AWS to include the newly created bucket
-        await loadBuckets();
-        
-        // Auto-select the newly created client
-        setSelectedBucket(fullBucketName);
-        
-        // Load real project data from AWS for the new bucket
-        // This will be handled by the useEffect when selectedBucket changes
-        
-        // Project data will be loaded automatically by useEffect when selectedBucket and selectedProject are set
+        if (modalType === 'client') {
+          // PRODUCTION MODE: Reload real data from AWS
+          // Reload buckets from AWS to include the newly created bucket
+          await loadBuckets();
+          
+          // Auto-select the newly created client
+          setSelectedBucket(fullBucketName);
+        } else {
+          // For new project, reload projects for the current client
+          await loadProjects(selectedBucket);
+          
+          // Auto-select the newly created project
+          setSelectedProject(projectName);
+        }
         
         // Close modal and reset
         setShowCreateModal(false);
@@ -252,8 +261,11 @@ const ContestManager: React.FC = () => {
     setShowCreateModal(true);
     setClientName('');
     setProjectHandle('');
-    setFlightStartDate('');
-    setFlightEndDate('');
+    // Only reset flight dates for new client, preserve them for new project
+    if (type === 'client') {
+      setFlightStartDate('');
+      setFlightEndDate('');
+    }
     setCreateStatus('idle');
   };
 
@@ -347,20 +359,20 @@ const ContestManager: React.FC = () => {
     try {
       setLoading(prev => ({ ...prev, downloadCSV: true }));
       
-      // Call the API to generate and download filtered CSV
+      // Call the API to generate and download filtered CSV with contest rules info
       const downloadUrl = await contestAPI.downloadFilteredCSV(selectedBucket, selectedProject);
       
       // Create a temporary link and trigger download
       const link = document.createElement('a');
       link.href = downloadUrl;
-      link.download = `filtered_entries_${selectedBucket}_${selectedProject}_${new Date().toISOString().split('T')[0]}.csv`;
+      link.download = `contest_entries_${selectedBucket}_${selectedProject}_${new Date().toISOString().split('T')[0]}.csv`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       
     } catch (error) {
-      console.error('Failed to download filtered CSV:', error);
-      alert('Failed to download filtered CSV: ' + error);
+      console.error('Failed to download entries:', error);
+      alert('Failed to download entries: ' + error);
     } finally {
       setLoading(prev => ({ ...prev, downloadCSV: false }));
     }
@@ -618,18 +630,17 @@ const ContestManager: React.FC = () => {
 
       {/* Entry Blacklist Management */}
       <section className="section blacklist-management">
-        <div className="section-header">
-          <h2>🚫 Entry Blacklist Management</h2>
-          <p className="section-description">
-            Manage entries that should be automatically filtered out during data processing. 
-            This blacklist is specific to this project and will be applied when processing raw entries.
-          </p>
-        </div>
 
         {hasClientAndProject && (
           <>
             {blacklistEditMode ? (
               <div className="blacklist-form">
+                <div className="blacklist-form-header">
+                  <h3>🚫 Entry Blacklist</h3>
+                  <p className="form-description">
+                    Configure entries to automatically filter out during data processing.
+                  </p>
+                </div>
                 <BlacklistForm 
                   blacklist={projectBlacklist} 
                   onSave={setBlacklist} 
@@ -639,7 +650,7 @@ const ContestManager: React.FC = () => {
             ) : (
               <div className="blacklist-saved-display">
                 <div className="saved-blacklist-header">
-                  <h3>✅ Project Blacklist Configured</h3>
+                  <h3>✅ Entry Blacklist Configured</h3>
                   <button
                     onClick={() => setBlacklistEditMode(true)}
                     className="edit-blacklist-btn"
@@ -733,19 +744,11 @@ const ContestManager: React.FC = () => {
             <div className="data-processing-controls">
               <div className="processing-actions">
                 <button
-                  onClick={processData}
-                  disabled={!canProcessData || loading.processData}
-                  className="action-btn primary large"
-                >
-                  {loading.processData ? 'Processing...' : 'Process Raw Entries'}
-                </button>
-                
-                <button
                   onClick={downloadFilteredCSV}
                   disabled={!canProcessData || loading.downloadCSV}
-                  className="action-btn secondary large"
+                  className="action-btn primary large"
                 >
-                  {loading.downloadCSV ? 'Generating...' : 'Download Filtered CSV'}
+                  {loading.downloadCSV ? 'Generating Report...' : 'Download Entries'}
                 </button>
               </div>
               
@@ -759,6 +762,62 @@ const ContestManager: React.FC = () => {
                       <span className="status-message">{processingStatus.message}</span>
                     )}
                   </div>
+                  
+                  {/* Contest Rules Applied - Show in UI */}
+                  {processingStatus.filter_statistics && contestRules && (
+                    <div className="contest-rules-applied">
+                      <h4>📋 Contest Rules Applied to Last Download:</h4>
+                      <div className="rules-summary">
+                        <div className="rule-item">
+                          <strong>Age Range:</strong> {contestRules.age_min || 18}-{contestRules.age_max || 99} years
+                        </div>
+                        <div className="rule-item">
+                          <strong>Max Entries Per Person:</strong> {contestRules.max_entries_per_person || 1}
+                        </div>
+                        <div className="rule-item">
+                          <strong>Eligible States:</strong> {contestRules.eligible_states?.length > 0 ? contestRules.eligible_states.join(', ') : 'All States'}
+                        </div>
+                        <div className="rule-item">
+                          <strong>Contest Period:</strong> {contestRules.flight_start_date ? new Date(contestRules.flight_start_date).toLocaleDateString() : 'Not Set'} to {contestRules.flight_end_date ? new Date(contestRules.flight_end_date).toLocaleDateString() : 'Not Set'}
+                        </div>
+                      </div>
+                      
+                      <h4>🚫 Blacklist Filters Applied:</h4>
+                      <div className="blacklist-summary">
+                        <div className="filter-item">
+                          <strong>Blocked Emails:</strong> {projectBlacklist?.emails?.length || 0} entries
+                        </div>
+                        <div className="filter-item">
+                          <strong>Blocked Names:</strong> {projectBlacklist?.names?.length || 0} entries
+                        </div>
+                        <div className="filter-item">
+                          <strong>Blocked Phones:</strong> {projectBlacklist?.phones?.length || 0} entries
+                        </div>
+                      </div>
+                      
+                      <h4>📊 Filtering Results:</h4>
+                      <div className="filtering-results">
+                        <div className="result-item">
+                          <strong>Total Raw Entries:</strong> {processingStatus.filter_statistics.total_entries}
+                        </div>
+                        <div className="result-item">
+                          <strong>Valid Entries:</strong> {processingStatus.filter_statistics.valid_entries}
+                        </div>
+                        <div className="result-item error">
+                          <strong>Blacklisted:</strong> {processingStatus.filter_statistics.blacklist_filtered}
+                        </div>
+                        <div className="result-item error">
+                          <strong>Date Filtered:</strong> {processingStatus.filter_statistics.date_filtered}
+                        </div>
+                        <div className="result-item error">
+                          <strong>Age Filtered:</strong> {processingStatus.filter_statistics.age_filtered}
+                        </div>
+                        <div className="result-item error">
+                          <strong>Duplicates Removed:</strong> {processingStatus.filter_statistics.duplicate_filtered}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -803,95 +862,98 @@ const ContestManager: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="stat-card processing-rate">
+                <div className="stat-card contest-status">
                   <div className="stat-header">
-                    <h3>📊 Processing Rate</h3>
+                    <h3>🎯 Contest Status</h3>
                   </div>
                   <div className="stat-content">
-                    <div className="stat-number">
-                      {processingStatus?.filter_statistics ? 
-                        `${Math.round((processingStatus.filter_statistics.valid_entries / processingStatus.filter_statistics.total_entries) * 100)}%` : 
-                        '0%'
-                      }
-                    </div>
-                    <div className="stat-label">Entries Eligible</div>
-                    {processingStatus?.filter_statistics && (
-                      <div className="stat-details">
-                        <div className="stat-breakdown error">
-                          Blacklisted: {processingStatus.filter_statistics.blacklist_filtered}
-                        </div>
-                        <div className="stat-breakdown error">
-                          Date Filtered: {processingStatus.filter_statistics.date_filtered}
-                        </div>
-                      </div>
-                    )}
+                    {(() => {
+                      // Get contest status based on flight dates
+                      const getContestStatus = () => {
+                        if (!contestRules?.flight_start_date || !contestRules?.flight_end_date) {
+                          return { status: 'Not Configured', percentage: 0, icon: '⚙️', color: 'gray' };
+                        }
+
+                        const now = new Date();
+                        const startDate = new Date(contestRules.flight_start_date);
+                        const endDate = new Date(contestRules.flight_end_date);
+                        
+                        // Before contest starts
+                        if (now < startDate) {
+                          const daysUntilStart = Math.ceil((startDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+                          return { 
+                            status: 'Upcoming', 
+                            percentage: 0, 
+                            icon: '⏳', 
+                            color: 'blue',
+                            detail: `Starts in ${daysUntilStart} day${daysUntilStart !== 1 ? 's' : ''}`
+                          };
+                        }
+                        
+                        // After contest ends
+                        if (now > endDate) {
+                          // Check if winners have been selected (validated folder has files)
+                          const hasValidatedEntries = validatedFiles && validatedFiles.length > 0;
+                          if (hasValidatedEntries) {
+                            return { 
+                              status: 'Fulfillment Complete', 
+                              percentage: 100, 
+                              icon: '✅', 
+                              color: 'green',
+                              detail: 'Winners selected & processed'
+                            };
+                          } else {
+                            return { 
+                              status: 'Ready for Winners', 
+                              percentage: 100, 
+                              icon: '🏆', 
+                              color: 'gold',
+                              detail: 'Contest ended - select winners'
+                            };
+                          }
+                        }
+                        
+                        // During contest
+                        const totalDuration = endDate.getTime() - startDate.getTime();
+                        const elapsed = now.getTime() - startDate.getTime();
+                        const percentage = Math.round((elapsed / totalDuration) * 100);
+                        const daysRemaining = Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+                        
+                        return { 
+                          status: 'Live Contest', 
+                          percentage, 
+                          icon: '🚀', 
+                          color: 'cyan',
+                          detail: `${daysRemaining} day${daysRemaining !== 1 ? 's' : ''} remaining`
+                        };
+                      };
+
+                      const status = getContestStatus();
+                      
+                      return (
+                        <>
+                          <div className={`contest-status-icon ${status.color}`}>
+                            {status.icon}
+                          </div>
+                          <div className="stat-number contest-percentage">
+                            {status.percentage}%
+                          </div>
+                          <div className="stat-label contest-status-label">
+                            {status.status}
+                          </div>
+                          {status.detail && (
+                            <div className="contest-status-detail">
+                              {status.detail}
+                            </div>
+                          )}
+                        </>
+                      );
+                    })()}
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Validated Files List */}
-            {validatedFiles.length > 0 && (
-              <div className="validated-files">
-                <div className="files-header">
-                  <h3>📄 Validated Data Files</h3>
-                  <div className="bulk-actions">
-                    <button 
-                      onClick={() => contestAPI.downloadValidatedZip(selectedBucket, selectedProject)}
-                      className="action-btn primary"
-                      disabled={loading.downloadZip}
-                    >
-                      {loading.downloadZip ? 'Preparing...' : 'Download All as ZIP'}
-                    </button>
-                  </div>
-                </div>
-                
-                <div className="file-list">
-                  {validatedFiles.map(file => (
-                    <div key={file.key} className="file-item">
-                      <div className="file-info">
-                        <span className="file-name">{file.key.split('/').pop()}</span>
-                        <div className="file-meta">
-                          <span className="file-size">{file.size ? `${Math.round(file.size / 1024)}KB` : 'Unknown size'}</span>
-                          <span className="file-date">
-                            {file.last_modified ? new Date(file.last_modified).toLocaleDateString() : 'Unknown date'}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="file-actions">
-                        <button 
-                          onClick={() => contestAPI.downloadFile(selectedBucket, selectedProject, file.key)}
-                          className="action-btn small primary"
-                          disabled={loading.downloadFile}
-                        >
-                          Download CSV
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* No Data State */}
-            {validatedFiles.length === 0 && !loading.processData && (
-              <div className="no-data-state">
-                <div className="no-data-content">
-                  <div className="no-data-icon">📊</div>
-                  <h3>No Validated Data Yet</h3>
-                  <p>Process your raw entries to generate validated data files and view entry statistics.</p>
-                  {rawEntries.length > 0 && (
-                    <button
-                      onClick={processData}
-                      className="action-btn primary large"
-                      disabled={!canProcessData}
-                    >
-                      Process {rawEntries.length} Raw Entries
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
           </>
         )}
 
@@ -910,26 +972,68 @@ const ContestManager: React.FC = () => {
       <section className="section winner-management">
         <div className="section-header">
           <h2>🏆 Winner Management</h2>
-          {!canSelectWinners && <span className="disabled-badge">Complete Data Processing First</span>}
         </div>
 
-        {canSelectWinners && (
+        {hasClientAndProject && (
           <div className="winner-controls">
-            <div className="winner-info">
-              <span>Winner Selection ({processingStatus?.eligible_contestants} eligible contestants):</span>
-            </div>
-            
-            <div className="button-grid">
-              <button 
-                onClick={selectWinners}
-                className="action-btn primary"
-                disabled={loading.selectWinners}
-              >
-                {loading.selectWinners ? 'Selecting...' : 'Select Winners'}
-              </button>
-              <button className="action-btn">Check Winner Status</button>
-              <button className="action-btn">Winner Results Table</button>
-            </div>
+            {(() => {
+              // Check if contest is ended and can be finalized
+              const canFinalizeContest = () => {
+                if (!contestRules?.flight_end_date) return false;
+                const now = new Date();
+                const endDate = new Date(contestRules.flight_end_date);
+                // Contest must be ended by 00:15:00 AM of the day after
+                const finalizeTime = new Date(endDate);
+                finalizeTime.setDate(finalizeTime.getDate() + 1);
+                finalizeTime.setHours(0, 15, 0, 0);
+                return now >= finalizeTime;
+              };
+
+              const canFinalize = canFinalizeContest();
+              const hasValidatedEntries = validatedFiles && validatedFiles.length > 0;
+
+              return (
+                <>
+                  <div className="finalize-section">
+                    <button 
+                      onClick={processData}
+                      className="action-btn primary large"
+                      disabled={!canFinalize || hasValidatedEntries || loading.processData}
+                      title={!canFinalize ? "Contest must end and pass 00:15:00 AM deadline" : hasValidatedEntries ? "Contest already finalized" : "Finalize contest for winner selection"}
+                    >
+                      {loading.processData ? 'Finalizing...' : hasValidatedEntries ? '✅ Contest Finalized' : '🆕 Finalize Contest'}
+                    </button>
+                    <p className="finalize-info">
+                      {!canFinalize ? "Available after contest ends (00:15 AM deadline)" : 
+                       hasValidatedEntries ? "Contest has been finalized - entries saved to validated folder" :
+                       "Save final validated entries for winner selection"}
+                    </p>
+                  </div>
+
+                  {hasValidatedEntries && (
+                    <div className="winner-selection">
+                      <div className="winner-info">
+                        <span>Winner Selection ({processingStatus?.eligible_contestants || 'Loading...'} eligible contestants):</span>
+                      </div>
+                      
+                      <div className="button-grid">
+                        <button 
+                          onClick={selectWinners}
+                          className="action-btn primary"
+                          disabled={loading.selectWinners}
+                        >
+                          {loading.selectWinners ? 'Selecting...' : 'Select Winners'}
+                        </button>
+                        <button className="action-btn">Check Winner Status</button>
+                        <button className="action-btn">Winner Results Table</button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
+          </div>
+        )}
 
             {winners.length > 0 && (
               <div className="winners-table">
