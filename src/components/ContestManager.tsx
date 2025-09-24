@@ -224,7 +224,7 @@ const ContestManager: React.FC = () => {
           setSelectedBucket(fullBucketName);
         } else {
           // For new project, reload projects for the current client
-          await loadProjects(selectedBucket);
+          await loadProjects();
           
           // Auto-select the newly created project
           setSelectedProject(projectName);
@@ -977,63 +977,22 @@ const ContestManager: React.FC = () => {
         {hasClientAndProject && (
           <div className="winner-controls">
             {(() => {
-              // Check if contest is ended and can be finalized
-              const canFinalizeContest = () => {
-                if (!contestRules?.flight_end_date) return false;
-                const now = new Date();
-                const endDate = new Date(contestRules.flight_end_date);
-                // Contest must be ended by 00:15:00 AM of the day after
-                const finalizeTime = new Date(endDate);
-                finalizeTime.setDate(finalizeTime.getDate() + 1);
-                finalizeTime.setHours(0, 15, 0, 0);
-                return now >= finalizeTime;
-              };
+              if (!contestRules?.flight_start_date || !contestRules?.flight_end_date) {
+                return <p className="status-message">📅 <strong>Contest Status:</strong> Dates not configured</p>;
+              }
 
-              const canFinalize = canFinalizeContest();
-              const hasValidatedEntries = validatedFiles && validatedFiles.length > 0;
+              const now = new Date();
+              const startDate = new Date(contestRules.flight_start_date);
+              const endDate = new Date(contestRules.flight_end_date);
 
-              return (
-                <>
-                  <div className="finalize-section">
-                    <button 
-                      onClick={processData}
-                      className="action-btn primary large"
-                      disabled={!canFinalize || hasValidatedEntries || loading.processData}
-                      title={!canFinalize ? "Contest must end and pass 00:15:00 AM deadline" : hasValidatedEntries ? "Contest already finalized" : "Finalize contest for winner selection"}
-                    >
-                      {loading.processData ? 'Finalizing...' : hasValidatedEntries ? '✅ Contest Finalized' : '🆕 Finalize Contest'}
-                    </button>
-                    <p className="finalize-info">
-                      {!canFinalize ? "Available after contest ends (00:15 AM deadline)" : 
-                       hasValidatedEntries ? "Contest has been finalized - entries saved to validated folder" :
-                       "Save final validated entries for winner selection"}
-                    </p>
-                  </div>
-
-                  {hasValidatedEntries && (
-                    <div className="winner-selection">
-                      <div className="winner-info">
-                        <span>Winner Selection ({processingStatus?.eligible_contestants || 'Loading...'} eligible contestants):</span>
-                      </div>
-                      
-                      <div className="button-grid">
-                        <button 
-                          onClick={selectWinners}
-                          className="action-btn primary"
-                          disabled={loading.selectWinners}
-                        >
-                          {loading.selectWinners ? 'Selecting...' : 'Select Winners'}
-                        </button>
-                        <button className="action-btn">Check Winner Status</button>
-                        <button className="action-btn">Winner Results Table</button>
-                      </div>
-                    </div>
-                  )}
-                </>
-              );
+              if (now < startDate) {
+                return <p className="status-message">⏳ <strong>Upcoming Contest</strong> - Starts {startDate.toLocaleDateString()}</p>;
+              } else if (now >= startDate && now <= endDate) {
+                return <p className="status-message">🔴 <strong>Live Contest</strong> - Ends {endDate.toLocaleDateString()}</p>;
+              } else {
+                return <p className="status-message">🏁 <strong>Closed Contest</strong> - Ended {endDate.toLocaleDateString()}</p>;
+              }
             })()}
-          </div>
-        )}
 
             {winners.length > 0 && (
               <div className="winners-table">
