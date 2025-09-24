@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import mondaySdk from 'monday-sdk-js';
+import { config } from '../config/environment';
 import './MondayAuth.css';
 
 interface MondayAuthProps {
@@ -21,8 +22,8 @@ const MondayAuth: React.FC<MondayAuthProps> = ({ children }) => {
   const [user, setUser] = useState<MondayUser | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Development mode bypass
-  const isDevelopmentMode = process.env.NODE_ENV === 'development' && process.env.REACT_APP_BYPASS_AUTH === 'true';
+  // Development mode bypass - use consistent environment config
+  const isDevelopmentMode = config.isDevelopment && process.env.REACT_APP_BYPASS_AUTH === 'true';
 
   const redirectToOAuth = useCallback(() => {
     const clientId = process.env.REACT_APP_MONDAY_CLIENT_ID;

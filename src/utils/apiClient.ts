@@ -368,21 +368,31 @@ class ContestManagerAPI {
     });
   }
 
+  // Testing & Development (only available in development mode)
   async triggerDataPipeline(clientName: string) {
-    return this.request('/test/data-pipeline', {
-      method: 'POST',
-      body: JSON.stringify({ client_name: clientName }),
-    });
+    if (config.isDevelopment) {
+      return this.request('/test/data-pipeline', {
+        method: 'POST',
+        body: JSON.stringify({ client_name: clientName }),
+      });
+    }
+    throw new Error('Test endpoints only available in development mode');
   }
 
   async testS3Communication() {
-    return this.request('/test/s3-communication');
+    if (config.isDevelopment) {
+      return this.request('/test/s3-communication');
+    }
+    throw new Error('Test endpoints only available in development mode');
   }
 
   async loadTestData() {
-    return this.request('/test/load-data', {
-      method: 'POST',
-    });
+    if (config.isDevelopment) {
+      return this.request('/test/load-data', {
+        method: 'POST',
+      });
+    }
+    throw new Error('Test endpoints only available in development mode');
   }
 
   // System Health

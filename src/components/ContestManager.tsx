@@ -209,31 +209,15 @@ const ContestManager: React.FC = () => {
       
       // Wait 2 seconds to show success message, then auto-select and close
       setTimeout(async () => {
-        // DEVELOPMENT MODE: Simulate bucket and project data
-        // Add the new bucket to the existing buckets list
-        setBuckets(prevBuckets => {
-          const bucketExists = prevBuckets.some(bucket => bucket.name === fullBucketName);
-          if (!bucketExists) {
-            return [...prevBuckets, { 
-              name: fullBucketName, 
-              creation_date: new Date().toISOString(),
-              region: 'us-east-1'
-            }];
-          }
-          return prevBuckets;
-        });
+        // PRODUCTION MODE: Reload real data from AWS
+        // Reload buckets from AWS to include the newly created bucket
+        await loadBuckets();
         
         // Auto-select the newly created client
         setSelectedBucket(fullBucketName);
         
-        // Simulate project data for the new bucket
-        const mockProjectData = [{ 
-          name: projectName, 
-          path: `${fullBucketName}/${projectName}`,
-          last_modified: new Date().toISOString() 
-        }];
-        setProjects(mockProjectData);
-        setSelectedProject(projectName);
+        // Load real project data from AWS for the new bucket
+        // This will be handled by the useEffect when selectedBucket changes
         
         // Project data will be loaded automatically by useEffect when selectedBucket and selectedProject are set
         
