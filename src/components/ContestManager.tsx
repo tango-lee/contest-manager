@@ -50,11 +50,14 @@ const ContestManager: React.FC = () => {
     try {
       setLoading(prev => ({ ...prev, projects: true }));
       
+      console.log('Loading projects for bucket:', selectedBucket);
       // Production mode: Call real AWS API
       const projectList = await contestAPI.listProjects(selectedBucket);
+      console.log('Projects loaded:', projectList);
       setProjects(projectList);
     } catch (error) {
       console.error('Failed to load projects:', error);
+      setErrors(prev => ({ ...prev, projects: `Failed to load projects: ${error}` }));
       setProjects([]);
     } finally {
       setLoading(prev => ({ ...prev, projects: false }));
@@ -555,11 +558,18 @@ const ContestManager: React.FC = () => {
                   disabled={!selectedBucket || loading.projects}
                   className="project-dropdown"
                 >
-                  <option value="">Select a project...</option>
+                  <option value="">
+                    {loading.projects ? 'Loading projects...' : 'Select a project...'}
+                  </option>
                   {selectedBucket && projects.map(project => (
                     <option key={project.name} value={project.name}>{project.name}</option>
                   ))}
                 </select>
+                {errors.projects && (
+                  <div className="error-message" style={{ marginTop: '8px', color: '#ff6b6b', fontSize: '14px' }}>
+                    {errors.projects}
+                  </div>
+                )}
                 <button 
                   onClick={() => openCreateModal('project')} 
                   className="action-btn primary"

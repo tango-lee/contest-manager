@@ -193,9 +193,9 @@ class ContestManagerAPI {
     });
   }
 
-  async listProjects(bucketName?: string): Promise<S3Project[]> {
-    // Use dedicated projects endpoint
-    return this.request('/projects');
+  async listProjects(bucketName: string): Promise<S3Project[]> {
+    // Use bucket-specific projects endpoint
+    return this.request(`/buckets/${bucketName}/projects`);
   }
 
   async listClients(): Promise<S3Bucket[]> {
