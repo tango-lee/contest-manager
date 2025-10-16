@@ -325,7 +325,7 @@ const ContestManager: React.FC = () => {
   };
 
   const deleteRules = async () => {
-    if (!confirm('Are you sure you want to delete the contest rules? This action cannot be undone.')) {
+    if (!window.confirm('Are you sure you want to delete the contest rules? This action cannot be undone.')) {
       return;
     }
 
@@ -364,7 +364,7 @@ const ContestManager: React.FC = () => {
   };
 
   const deleteBlacklist = async () => {
-    if (!confirm('Are you sure you want to delete the project blacklist? This action cannot be undone.')) {
+    if (!window.confirm('Are you sure you want to delete the project blacklist? This action cannot be undone.')) {
       return;
     }
 
