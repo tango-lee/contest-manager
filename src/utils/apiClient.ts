@@ -94,10 +94,13 @@ export interface ProcessingStatus {
 export interface UniqodeAnalytics {
   total_scans: number;
   unique_scans: number;
-  conversion_rate: number;
+  scans_by_city: { [city: string]: number };
+  scans_by_time: { [hour: string]: number };
   last_updated: string;
   qr_code_url?: string;
   campaign_id?: string;
+  top_cities?: string[];
+  peak_hours?: string[];
 }
 
 class ContestManagerAPI {

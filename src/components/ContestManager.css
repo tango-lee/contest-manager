@@ -2375,11 +2375,18 @@ input:focus {
   cursor: not-allowed;
 }
 
-.analytics-grid {
+.analytics-main-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 24px;
   padding: 24px;
+}
+
+.analytics-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  padding: 0 24px 24px;
 }
 
 .analytics-card {
@@ -2416,6 +2423,116 @@ input:focus {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   font-weight: 500;
+}
+
+/* Detailed Analytics Cards */
+
+.analytics-detail-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.detail-header {
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.detail-header h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+/* City Analytics */
+
+.city-list {
+  padding: 16px 20px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.city-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.city-item:last-child {
+  border-bottom: none;
+}
+
+.city-name {
+  font-size: 14px;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.city-count {
+  font-size: 14px;
+  color: #00d4ff;
+  font-weight: 600;
+}
+
+/* Time Analytics */
+
+.time-chart {
+  padding: 16px 20px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.time-item {
+  display: grid;
+  grid-template-columns: 60px 1fr 40px;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+}
+
+.time-label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+  text-align: right;
+}
+
+.time-bar-container {
+  height: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+}
+
+.time-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #00d4ff, #0099cc);
+  border-radius: 8px;
+  transition: width 0.3s ease;
+  min-width: 2px;
+}
+
+.time-count {
+  font-size: 12px;
+  color: #00d4ff;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* No Data State */
+
+.no-data {
+  text-align: center;
+  padding: 40px 20px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 14px;
+  font-style: italic;
 }
 
 .analytics-footer {
@@ -2471,10 +2588,16 @@ input:focus {
 /* Responsive Design for Analytics */
 
 @media (max-width: 768px) {
-  .analytics-grid {
+  .analytics-main-grid {
     grid-template-columns: 1fr;
     gap: 16px;
     padding: 20px;
+  }
+  
+  .analytics-details-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 0 20px 20px;
   }
   
   .analytics-header {
@@ -2497,5 +2620,23 @@ input:focus {
   
   .no-analytics-state {
     padding: 30px 20px;
+  }
+  
+  .city-list, .time-chart {
+    padding: 12px 16px;
+    max-height: 250px;
+  }
+  
+  .detail-header {
+    padding: 12px 16px;
+  }
+  
+  .time-item {
+    grid-template-columns: 50px 1fr 35px;
+    gap: 8px;
+  }
+  
+  .time-label {
+    font-size: 11px;
   }
 }

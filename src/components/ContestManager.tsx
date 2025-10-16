@@ -1123,57 +1123,109 @@ const ContestManager: React.FC = () => {
                 </button>
               </div>
               
-              <div className="analytics-grid">
-                <div className="analytics-card total-scans">
-                  <div className="analytics-icon">📱</div>
-                  <div className="analytics-content">
-                    <div className="analytics-number">
-                      {uniqodeAnalytics?.total_scans?.toLocaleString() || '—'}
+              {uniqodeAnalytics ? (
+                <>
+                  {/* Main Metrics */}
+                  <div className="analytics-main-grid">
+                    <div className="analytics-card total-scans">
+                      <div className="analytics-icon">📱</div>
+                      <div className="analytics-content">
+                        <div className="analytics-number">
+                          {uniqodeAnalytics.total_scans?.toLocaleString() || '—'}
+                        </div>
+                        <div className="analytics-label">Total Scans</div>
+                      </div>
                     </div>
-                    <div className="analytics-label">Total Scans</div>
-                  </div>
-                </div>
 
-                <div className="analytics-card unique-scans">
-                  <div className="analytics-icon">👥</div>
-                  <div className="analytics-content">
-                    <div className="analytics-number">
-                      {uniqodeAnalytics?.unique_scans?.toLocaleString() || '—'}
+                    <div className="analytics-card unique-scans">
+                      <div className="analytics-icon">👥</div>
+                      <div className="analytics-content">
+                        <div className="analytics-number">
+                          {uniqodeAnalytics.unique_scans?.toLocaleString() || '—'}
+                        </div>
+                        <div className="analytics-label">Unique Scans</div>
+                      </div>
                     </div>
-                    <div className="analytics-label">Unique Contestants</div>
                   </div>
-                </div>
 
-                <div className="analytics-card conversion-rate">
-                  <div className="analytics-icon">📈</div>
-                  <div className="analytics-content">
-                    <div className="analytics-number">
-                      {uniqodeAnalytics?.conversion_rate ? `${(uniqodeAnalytics.conversion_rate * 100).toFixed(1)}%` : '—'}
+                  {/* Detailed Analytics */}
+                  <div className="analytics-details-grid">
+                    {/* Scans by City */}
+                    <div className="analytics-detail-card city-analytics">
+                      <div className="detail-header">
+                        <h4>🏙️ Scans by City in US</h4>
+                      </div>
+                      <div className="city-list">
+                        {uniqodeAnalytics.scans_by_city && Object.keys(uniqodeAnalytics.scans_by_city).length > 0 ? (
+                          Object.entries(uniqodeAnalytics.scans_by_city)
+                            .sort(([,a], [,b]) => b - a)
+                            .slice(0, 8)
+                            .map(([city, count]) => (
+                              <div key={city} className="city-item">
+                                <span className="city-name">{city}</span>
+                                <span className="city-count">{count.toLocaleString()}</span>
+                              </div>
+                            ))
+                        ) : (
+                          <div className="no-data">No city data available</div>
+                        )}
+                      </div>
                     </div>
-                    <div className="analytics-label">Engagement Rate</div>
+
+                    {/* Scans by Time of Day */}
+                    <div className="analytics-detail-card time-analytics">
+                      <div className="detail-header">
+                        <h4>🕐 Scans by Time of Day</h4>
+                      </div>
+                      <div className="time-chart">
+                        {uniqodeAnalytics.scans_by_time && Object.keys(uniqodeAnalytics.scans_by_time).length > 0 ? (
+                          Object.entries(uniqodeAnalytics.scans_by_time)
+                            .sort(([a], [b]) => parseInt(a) - parseInt(b))
+                            .map(([hour, count]) => {
+                              const maxCount = Math.max(...Object.values(uniqodeAnalytics.scans_by_time));
+                              const percentage = maxCount > 0 ? (count / maxCount) * 100 : 0;
+                              const hourLabel = parseInt(hour) === 0 ? '12 AM' : 
+                                               parseInt(hour) < 12 ? `${hour} AM` : 
+                                               parseInt(hour) === 12 ? '12 PM' : 
+                                               `${parseInt(hour) - 12} PM`;
+                              
+                              return (
+                                <div key={hour} className="time-item">
+                                  <div className="time-label">{hourLabel}</div>
+                                  <div className="time-bar-container">
+                                    <div 
+                                      className="time-bar" 
+                                      style={{ width: `${percentage}%` }}
+                                    />
+                                  </div>
+                                  <div className="time-count">{count}</div>
+                                </div>
+                              );
+                            })
+                        ) : (
+                          <div className="no-data">No time data available</div>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
 
-              {uniqodeAnalytics?.last_updated && (
-                <div className="analytics-footer">
-                  <span className="analytics-timestamp">
-                    Last updated: {new Date(uniqodeAnalytics.last_updated).toLocaleString()}
-                  </span>
-                  {uniqodeAnalytics.qr_code_url && (
-                    <a 
-                      href={uniqodeAnalytics.qr_code_url} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="qr-code-link"
-                    >
-                      View QR Code 🔗
-                    </a>
-                  )}
-                </div>
-              )}
-
-              {!uniqodeAnalytics && (
+                  <div className="analytics-footer">
+                    <span className="analytics-timestamp">
+                      Last updated: {new Date(uniqodeAnalytics.last_updated).toLocaleString()}
+                    </span>
+                    {uniqodeAnalytics.qr_code_url && (
+                      <a 
+                        href={uniqodeAnalytics.qr_code_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="qr-code-link"
+                      >
+                        View QR Code 🔗
+                      </a>
+                    )}
+                  </div>
+                </>
+              ) : (
                 <div className="no-analytics-state">
                   <div className="no-analytics-icon">📊</div>
                   <p>No QR code analytics available</p>
