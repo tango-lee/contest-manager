@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { contestAPI, S3Bucket, S3Project, S3File, ContestRules, ProcessingStatus, Winner, WinnerRule, ProjectBlacklist } from '../utils/apiClient';
+import { contestAPI, S3Bucket, S3Project, S3File, ContestRules, ProcessingStatus, Winner, WinnerRule, ProjectBlacklist, UniqodeAnalytics } from '../utils/apiClient';
 import FileUpload from './FileUpload';
 import './ContestManager.css';
 
@@ -20,6 +20,7 @@ const ContestManager: React.FC = () => {
   const [winners, setWinners] = useState<Winner[]>([]);
   const [projectBlacklist, setProjectBlacklist] = useState<ProjectBlacklist | null>(null);
   const [blacklistEditMode, setBlacklistEditMode] = useState<boolean>(true);
+  const [uniqodeAnalytics, setUniqodeAnalytics] = useState<UniqodeAnalytics | null>(null);
   const [loading, setLoading] = useState<{ [key: string]: boolean }>({});
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
@@ -132,6 +133,15 @@ const ContestManager: React.FC = () => {
           setWinners(winnerList);
         } catch (error) {
           setWinners([]);
+        }
+        
+        // Load Uniqode analytics
+        try {
+          const analytics = await contestAPI.getUniqodeAnalytics(selectedBucket, selectedProject);
+          setUniqodeAnalytics(analytics);
+        } catch (error) {
+          console.warn('Failed to load Uniqode analytics:', error);
+          setUniqodeAnalytics(null);
         }
         
     } catch (error) {
@@ -372,6 +382,23 @@ const ContestManager: React.FC = () => {
       alert('Failed to delete project blacklist: ' + error);
     } finally {
       setLoading(prev => ({ ...prev, deleteBlacklist: false }));
+    }
+  };
+
+  const refreshUniqodeAnalytics = async () => {
+    try {
+      setLoading(prev => ({ ...prev, refreshAnalytics: true }));
+      
+      // Trigger sync and get updated data
+      await contestAPI.refreshUniqodeData(selectedBucket, selectedProject);
+      const analytics = await contestAPI.getUniqodeAnalytics(selectedBucket, selectedProject);
+      setUniqodeAnalytics(analytics);
+      
+    } catch (error) {
+      console.error('Failed to refresh Uniqode analytics:', error);
+      alert('Failed to refresh analytics: ' + error);
+    } finally {
+      setLoading(prev => ({ ...prev, refreshAnalytics: false }));
     }
   };
 
@@ -1081,6 +1108,78 @@ const ContestManager: React.FC = () => {
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* Uniqode QR Code Analytics */}
+            <div className="uniqode-analytics">
+              <div className="analytics-header">
+                <h3>📊 QR Code Analytics (Uniqode)</h3>
+                <button
+                  onClick={refreshUniqodeAnalytics}
+                  disabled={loading.refreshAnalytics}
+                  className="refresh-analytics-btn"
+                >
+                  {loading.refreshAnalytics ? '🔄 Syncing...' : '🔄 Refresh Data'}
+                </button>
+              </div>
+              
+              <div className="analytics-grid">
+                <div className="analytics-card total-scans">
+                  <div className="analytics-icon">📱</div>
+                  <div className="analytics-content">
+                    <div className="analytics-number">
+                      {uniqodeAnalytics?.total_scans?.toLocaleString() || '—'}
+                    </div>
+                    <div className="analytics-label">Total Scans</div>
+                  </div>
+                </div>
+
+                <div className="analytics-card unique-scans">
+                  <div className="analytics-icon">👥</div>
+                  <div className="analytics-content">
+                    <div className="analytics-number">
+                      {uniqodeAnalytics?.unique_scans?.toLocaleString() || '—'}
+                    </div>
+                    <div className="analytics-label">Unique Contestants</div>
+                  </div>
+                </div>
+
+                <div className="analytics-card conversion-rate">
+                  <div className="analytics-icon">📈</div>
+                  <div className="analytics-content">
+                    <div className="analytics-number">
+                      {uniqodeAnalytics?.conversion_rate ? `${(uniqodeAnalytics.conversion_rate * 100).toFixed(1)}%` : '—'}
+                    </div>
+                    <div className="analytics-label">Engagement Rate</div>
+                  </div>
+                </div>
+              </div>
+
+              {uniqodeAnalytics?.last_updated && (
+                <div className="analytics-footer">
+                  <span className="analytics-timestamp">
+                    Last updated: {new Date(uniqodeAnalytics.last_updated).toLocaleString()}
+                  </span>
+                  {uniqodeAnalytics.qr_code_url && (
+                    <a 
+                      href={uniqodeAnalytics.qr_code_url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="qr-code-link"
+                    >
+                      View QR Code 🔗
+                    </a>
+                  )}
+                </div>
+              )}
+
+              {!uniqodeAnalytics && (
+                <div className="no-analytics-state">
+                  <div className="no-analytics-icon">📊</div>
+                  <p>No QR code analytics available</p>
+                  <p className="no-analytics-hint">Analytics will appear once Uniqode integration is configured</p>
+                </div>
+              )}
             </div>
 
           </>

@@ -91,6 +91,15 @@ export interface ProcessingStatus {
   };
 }
 
+export interface UniqodeAnalytics {
+  total_scans: number;
+  unique_scans: number;
+  conversion_rate: number;
+  last_updated: string;
+  qr_code_url?: string;
+  campaign_id?: string;
+}
+
 class ContestManagerAPI {
   private baseURL: string;
   private apiKey?: string;
@@ -494,6 +503,27 @@ class ContestManagerAPI {
 
   async getLambdaLogs(functionName: string) {
     return this.request(`/logs/${functionName}`);
+  }
+
+  // Uniqode Analytics Integration
+  async getUniqodeAnalytics(bucketName: string, projectName: string): Promise<UniqodeAnalytics | null> {
+    try {
+      return await this.request(`/analytics/${bucketName}/${projectName}`);
+    } catch (error) {
+      console.warn('Failed to get Uniqode analytics:', error);
+      return null;
+    }
+  }
+
+  async syncUniqodeAnalytics(bucketName: string, projectName: string): Promise<UniqodeAnalytics> {
+    return this.request(`/analytics/${bucketName}/${projectName}`, {
+      method: 'PUT',
+    });
+  }
+
+  async refreshUniqodeData(bucketName: string, projectName: string): Promise<void> {
+    // Trigger a manual sync of Uniqode data
+    await this.syncUniqodeAnalytics(bucketName, projectName);
   }
 }
 
