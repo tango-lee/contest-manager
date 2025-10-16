@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { contestAPI, S3Bucket, S3Project, S3File, ContestRules, ProcessingStatus, Winner, WinnerRule, ProjectBlacklist } from '../utils/apiClient';
+import FileUpload from './FileUpload';
 import './ContestManager.css';
 
 const ContestManager: React.FC = () => {
@@ -313,6 +314,28 @@ const ContestManager: React.FC = () => {
     }
   };
 
+  const deleteRules = async () => {
+    if (!confirm('Are you sure you want to delete the contest rules? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      setLoading(prev => ({ ...prev, deleteRules: true }));
+      
+      // Production mode: call real AWS API
+      await contestAPI.deleteContestRules(selectedBucket, selectedProject);
+      
+      setContestRules(null);
+      setRulesEditMode(true); // Switch to form mode
+      alert('Contest rules deleted successfully');
+    } catch (error) {
+      console.error('Failed to delete contest rules:', error);
+      alert('Failed to delete contest rules: ' + error);
+    } finally {
+      setLoading(prev => ({ ...prev, deleteRules: false }));
+    }
+  };
+
   const setBlacklist = async (blacklist: ProjectBlacklist) => {
     try {
       setLoading(prev => ({ ...prev, setBlacklist: true }));
@@ -327,6 +350,28 @@ const ContestManager: React.FC = () => {
       alert('Failed to set project blacklist: ' + error);
     } finally {
       setLoading(prev => ({ ...prev, setBlacklist: false }));
+    }
+  };
+
+  const deleteBlacklist = async () => {
+    if (!confirm('Are you sure you want to delete the project blacklist? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      setLoading(prev => ({ ...prev, deleteBlacklist: true }));
+      
+      // Production mode: call real AWS API
+      await contestAPI.deleteProjectBlacklist(selectedBucket, selectedProject);
+      
+      setProjectBlacklist(null);
+      setBlacklistEditMode(true); // Switch to form mode
+      alert('Project blacklist deleted successfully');
+    } catch (error) {
+      console.error('Failed to delete project blacklist:', error);
+      alert('Failed to delete project blacklist: ' + error);
+    } finally {
+      setLoading(prev => ({ ...prev, deleteBlacklist: false }));
     }
   };
 
@@ -565,12 +610,21 @@ const ContestManager: React.FC = () => {
               <div className="rules-saved-display">
                 <div className="saved-rules-header">
                   <h3>✅ Contest Rules Configured</h3>
-                  <button
-                    onClick={() => setRulesEditMode(true)}
-                    className="edit-rules-btn"
-                  >
-                    Edit Rules
-                  </button>
+                  <div className="rules-actions">
+                    <button
+                      onClick={() => setRulesEditMode(true)}
+                      className="edit-rules-btn"
+                    >
+                      Edit Rules
+                    </button>
+                    <button
+                      onClick={deleteRules}
+                      className="delete-rules-btn"
+                      disabled={loading.deleteRules}
+                    >
+                      {loading.deleteRules ? 'Deleting...' : 'Delete Rules'}
+                    </button>
+                  </div>
                 </div>
                 
                 {contestRules && (
@@ -668,12 +722,21 @@ const ContestManager: React.FC = () => {
               <div className="blacklist-saved-display">
                 <div className="saved-blacklist-header">
                   <h3>✅ Entry Blacklist Configured</h3>
-                  <button
-                    onClick={() => setBlacklistEditMode(true)}
-                    className="edit-blacklist-btn"
-                  >
-                    Edit Blacklist
-                  </button>
+                  <div className="blacklist-actions">
+                    <button
+                      onClick={() => setBlacklistEditMode(true)}
+                      className="edit-blacklist-btn"
+                    >
+                      Edit Blacklist
+                    </button>
+                    <button
+                      onClick={deleteBlacklist}
+                      className="delete-blacklist-btn"
+                      disabled={loading.deleteBlacklist}
+                    >
+                      {loading.deleteBlacklist ? 'Deleting...' : 'Delete Blacklist'}
+                    </button>
+                  </div>
                 </div>
                 
                 {projectBlacklist && (
@@ -757,6 +820,56 @@ const ContestManager: React.FC = () => {
 
         {hasClientAndProject && (
           <>
+            {/* File Upload Section */}
+            <div className="file-upload-section">
+              <div className="upload-section-header">
+                <h3>📁 File Management</h3>
+                <p className="upload-description">
+                  Upload contest data files or project documents to S3
+                </p>
+              </div>
+              
+              <div className="upload-tabs">
+                <div className="upload-tab-content">
+                  <div className="upload-option">
+                    <h4>📊 Contest Data Upload (Partner API)</h4>
+                    <p>Upload contest entries to <code>entries/raw/</code> directory</p>
+                    <FileUpload
+                      bucketName={selectedBucket}
+                      projectName={selectedProject}
+                      uploadType="partner"
+                      acceptedFileTypes={['.json', '.csv', '.xlsx']}
+                      onUploadComplete={(fileKey) => {
+                        console.log('Contest data uploaded:', fileKey);
+                        // Refresh raw entries count
+                        loadProjectData();
+                      }}
+                      onUploadError={(error) => {
+                        console.error('Upload error:', error);
+                      }}
+                    />
+                  </div>
+                  
+                  <div className="upload-option">
+                    <h4>📄 Project Documents</h4>
+                    <p>Upload project files to <code>project_docs/</code> directory</p>
+                    <FileUpload
+                      bucketName={selectedBucket}
+                      projectName={selectedProject}
+                      uploadType="client"
+                      acceptedFileTypes={['.pdf', '.doc', '.docx', '.txt', '.zip']}
+                      onUploadComplete={(fileKey) => {
+                        console.log('Document uploaded:', fileKey);
+                      }}
+                      onUploadError={(error) => {
+                        console.error('Upload error:', error);
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Data Processing Controls */}
             <div className="data-processing-controls">
               <div className="processing-actions">

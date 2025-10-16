@@ -160,7 +160,7 @@ class ContestManagerAPI {
     return this.request(`/campaigns/${clientName}/${projectNumber}/health`);
   }
 
-  // S3 Operations (Updated to match AWS Lambda endpoints)
+  // S3 Operations (Updated to match actual AWS Gateway endpoints)
   async listS3Buckets(): Promise<S3Bucket[]> {
     return this.request('/buckets/list');
   }
@@ -169,8 +169,8 @@ class ContestManagerAPI {
     projectHandle: string;
     projectName: string;
     clientName: string;
-    flight_start_date?: string;
-    flight_end_date?: string;
+    flightStartDate?: string;
+    flightEndDate?: string;
   }) {
     return this.request('/clients/create', {
       method: 'POST',
@@ -181,8 +181,39 @@ class ContestManagerAPI {
     });
   }
 
-  async listProjects(bucketName: string): Promise<S3Project[]> {
-    return this.request(`/buckets/${bucketName}/projects`);
+  async listProjects(bucketName?: string): Promise<S3Project[]> {
+    // Use dedicated projects endpoint
+    return this.request('/projects');
+  }
+
+  async listClients(): Promise<S3Bucket[]> {
+    // Use dedicated clients endpoint
+    return this.request('/clients');
+  }
+
+  // Presigned URL Operations for S3 Uploads
+  async getPresignedUploadUrl(bucketName: string, projectName: string, fileName: string, fileType: string) {
+    return this.request<{ upload_url: string; file_key: string }>('/presign', {
+      method: 'POST',
+      body: JSON.stringify({
+        bucket_name: bucketName,
+        project_name: projectName,
+        file_name: fileName,
+        file_type: fileType
+      }),
+    });
+  }
+
+  async getPartnerPresignedUploadUrl(bucketName: string, projectName: string, fileName: string, fileType: string) {
+    return this.request<{ upload_url: string; file_key: string }>('/presign/partner', {
+      method: 'POST',
+      body: JSON.stringify({
+        bucket_name: bucketName,
+        project_name: projectName,
+        file_name: fileName,
+        file_type: fileType
+      }),
+    });
   }
 
   // Raw Entries Management
@@ -222,11 +253,11 @@ class ContestManagerAPI {
     window.location.href = response.download_url;
   }
 
-  // Contest Rules (Updated to match AWS Lambda endpoints)
-  async setContestRules(bucketName: string, projectId: string, rules: ContestRules) {
+  // Contest Rules (Full CRUD operations matching AWS Gateway endpoints)
+  async createContestRules(bucketName: string, projectId: string, rules: ContestRules) {
     return this.request(`/contest-rules/${bucketName}/${projectId}`, {
       method: 'POST',
-      body: JSON.stringify({ rules }),
+      body: JSON.stringify(rules),
     });
   }
 
@@ -234,17 +265,43 @@ class ContestManagerAPI {
     return this.request(`/contest-rules/${bucketName}/${projectId}`);
   }
 
+  async updateContestRules(bucketName: string, projectId: string, rules: ContestRules) {
+    return this.request(`/contest-rules/${bucketName}/${projectId}`, {
+      method: 'PUT',
+      body: JSON.stringify(rules),
+    });
+  }
+
+  async deleteContestRules(bucketName: string, projectId: string) {
+    return this.request(`/contest-rules/${bucketName}/${projectId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Legacy method for backward compatibility
+  async setContestRules(bucketName: string, projectId: string, rules: ContestRules) {
+    // Try to get existing rules first to determine if we should POST or PUT
+    try {
+      await this.getContestRules(bucketName, projectId);
+      // Rules exist, update them
+      return this.updateContestRules(bucketName, projectId, rules);
+    } catch (error) {
+      // Rules don't exist, create them
+      return this.createContestRules(bucketName, projectId, rules);
+    }
+  }
+
   // Get existing contest rules from S3 (returns null if not found)
   async getExistingRules(bucketName: string, projectId: string): Promise<ContestRules | null> {
     try {
-      return await this.request(`/contest-rules/${bucketName}/${projectId}`);
+      return await this.getContestRules(bucketName, projectId);
     } catch (error) {
       // Return null if no rules exist (404 error expected)
       return null;
     }
   }
 
-  // Blacklist Management
+  // Blacklist Management (Full CRUD operations matching AWS Gateway endpoints)
   async getProjectBlacklist(bucketName: string, projectId: string): Promise<ProjectBlacklist | null> {
     try {
       return await this.request(`/blacklist/${bucketName}/${projectId}`);
@@ -254,11 +311,37 @@ class ContestManagerAPI {
     }
   }
 
-  async setProjectBlacklist(bucketName: string, projectId: string, blacklist: ProjectBlacklist): Promise<void> {
+  async createProjectBlacklist(bucketName: string, projectId: string, blacklist: ProjectBlacklist): Promise<void> {
     return this.request(`/blacklist/${bucketName}/${projectId}`, {
       method: 'POST',
       body: JSON.stringify(blacklist),
     });
+  }
+
+  async updateProjectBlacklist(bucketName: string, projectId: string, blacklist: ProjectBlacklist): Promise<void> {
+    return this.request(`/blacklist/${bucketName}/${projectId}`, {
+      method: 'PUT',
+      body: JSON.stringify(blacklist),
+    });
+  }
+
+  async deleteProjectBlacklist(bucketName: string, projectId: string): Promise<void> {
+    return this.request(`/blacklist/${bucketName}/${projectId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Legacy method for backward compatibility
+  async setProjectBlacklist(bucketName: string, projectId: string, blacklist: ProjectBlacklist): Promise<void> {
+    // Try to get existing blacklist first to determine if we should POST or PUT
+    try {
+      await this.getProjectBlacklist(bucketName, projectId);
+      // Blacklist exists, update it
+      return this.updateProjectBlacklist(bucketName, projectId, blacklist);
+    } catch (error) {
+      // Blacklist doesn't exist, create it
+      return this.createProjectBlacklist(bucketName, projectId, blacklist);
+    }
   }
 
   // Data Processing (Updated for new on-demand system)

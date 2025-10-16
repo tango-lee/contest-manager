@@ -2196,3 +2196,128 @@ input:focus {
     padding: 1rem;
   }
 }
+
+/* File Upload Section Styles */
+
+.file-upload-section {
+  margin-bottom: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  overflow: hidden;
+}
+
+.upload-section-header {
+  padding: 20px 24px;
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.upload-section-header h3 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.upload-description {
+  margin: 0;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.upload-tabs {
+  padding: 24px;
+}
+
+.upload-tab-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.upload-option {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.upload-option h4 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.upload-option p {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.upload-option code {
+  background: rgba(0, 212, 255, 0.1);
+  color: #00d4ff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 12px;
+}
+
+/* Action Button Styles */
+
+.rules-actions, .blacklist-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.delete-rules-btn, .delete-blacklist-btn {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.delete-rules-btn:hover, .delete-blacklist-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+.delete-rules-btn:disabled, .delete-blacklist-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive Design */
+
+@media (max-width: 768px) {
+  .upload-tab-content {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .upload-section-header {
+    padding: 16px 20px;
+  }
+  
+  .upload-tabs {
+    padding: 20px;
+  }
+  
+  .upload-option {
+    padding: 16px;
+  }
+  
+  .rules-actions, .blacklist-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+}
