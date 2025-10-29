@@ -59,6 +59,8 @@ export interface ContestRules {
   flight_start_date: string; // Project flight dates from modal
   flight_end_date: string;   // Project flight dates from modal
   microsite_url?: string;     // Microsite URL for QR code generation
+  required_products?: string[]; // For receipt validation
+  receipt_product_keyword?: string; // For receipt validation
   prize_structure: {
     grand_prize: string;
     runner_up_prizes: string[];

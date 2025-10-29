@@ -170,7 +170,7 @@ const ReceiptValidation: React.FC<ReceiptValidationProps> = ({ selectedBucket, s
       // Update contest rules with new keyword
       const rules = await contestAPI.getContestRules(selectedBucket, selectedProject);
       rules.receipt_product_keyword = keyword.trim();
-      await contestAPI.saveContestRules(selectedBucket, selectedProject, rules);
+      await contestAPI.setContestRules(selectedBucket, selectedProject, rules);
       
       alert('Keyword updated successfully!');
     } catch (err) {

@@ -295,14 +295,14 @@ const ContestManager: React.FC = () => {
           // Reload buckets from AWS to include the newly created bucket
           await loadBuckets();
           
-          // Auto-select the newly created client
-          setSelectedBucket(fullBucketName);
+          // Auto-select the newly created client (use handler to clear state properly)
+          handleBucketChange(fullBucketName);
         } else {
           // For new project, reload projects for the current client
           await loadProjects();
           
-          // Auto-select the newly created project
-          setSelectedProject(projectName);
+          // Auto-select the newly created project (use handler to clear state properly)
+          handleProjectChange(projectName);
         }
         
         // Close modal and reset
@@ -336,11 +336,9 @@ const ContestManager: React.FC = () => {
     setShowCreateModal(true);
     setClientName('');
     setProjectHandle('');
-    // Only reset flight dates for new client, preserve them for new project
-    if (type === 'client') {
-      setFlightStartDate('');
-      setFlightEndDate('');
-    }
+    // Always clear flight dates when opening create modal (don't pre-populate)
+    setFlightStartDate('');
+    setFlightEndDate('');
     setCreateStatus('idle');
   };
 
@@ -351,6 +349,7 @@ const ContestManager: React.FC = () => {
     setProjectHandle('');
     setFlightStartDate('');
     setFlightEndDate('');
+    setCreatedBucketName('');
     setCreateStatus('idle');
   };
 
