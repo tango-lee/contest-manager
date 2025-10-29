@@ -1389,8 +1389,8 @@
 }
 
 .bucket-name-preview {
-  background: #f8f9fa;
-  border: 2px solid #e5e5e5;
+  background: #f0f0f0;
+  border: 2px solid #d0d0d0;
   border-radius: 8px;
   padding: 1rem;
   margin-bottom: 1rem;
@@ -1400,23 +1400,23 @@
 }
 
 .bucket-prefix {
-  color: #ffffff;
+  color: #555555;
   font-weight: 600;
 }
 
 .bucket-client-name {
   color: #ff1493;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .bucket-project-name {
-  color: #00d4aa;
-  font-weight: 600;
+  color: #00a88e;
+  font-weight: 700;
 }
 
 .bucket-project-handle {
-  color: #00d4ff;
-  font-weight: 600;
+  color: #0099cc;
+  font-weight: 700;
 }
 
 .input-instructions {
