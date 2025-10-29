@@ -93,6 +93,31 @@ const ContestManager: React.FC = () => {
     setErrors({});
   };
 
+  // Handler for project selection change - clears project-specific state
+  const handleProjectChange = (newProject: string) => {
+    setSelectedProject(newProject);
+    
+    // Clear project-specific data (but keep project list)
+    setRawEntries([]);
+    setValidatedFiles([]);
+    setContestRules(null);
+    setProjectBlacklist(null);
+    setWinners([]);
+    setProcessingStatus(null);
+    setUniqodeAnalytics(null);
+    setFlightStartDate('');
+    setFlightEndDate('');
+    setLastRawSync(null);
+    
+    // Reset edit modes to default
+    setRulesEditMode(true);
+    setBlacklistEditMode(true);
+    setFlightDatesEditMode(false);
+    
+    // Clear any errors
+    setErrors({});
+  };
+
   // Check for existing contest rules when client/project selected
   const checkExistingRules = useCallback(async () => {
     if (!selectedBucket || !selectedProject) return;
@@ -634,7 +659,7 @@ const ContestManager: React.FC = () => {
               <div className="inline-controls">
                 <select
                   value={selectedProject}
-                  onChange={(e) => setSelectedProject(e.target.value)}
+                  onChange={(e) => handleProjectChange(e.target.value)}
                   disabled={!selectedBucket || loading.projects}
                   className="project-dropdown"
                 >
