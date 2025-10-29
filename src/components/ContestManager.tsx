@@ -876,10 +876,31 @@ const ContestManager: React.FC = () => {
             {blacklistEditMode ? (
               <div className="blacklist-form">
                 <div className="blacklist-form-header">
-                  <h3>🚫 Entry Blacklist</h3>
-                  <p className="form-description">
-                    Configure entries to automatically filter out during data processing.
-                  </p>
+                  <h3>{projectBlacklist ? '✏️ Edit Entry Blacklist' : '🚫 Set Entry Blacklist'}</h3>
+                  <div className="blacklist-actions">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const saveBtn = document.querySelector('.save-blacklist-btn-internal') as HTMLButtonElement;
+                        if (saveBtn) saveBtn.click();
+                      }}
+                      className="save-blacklist-btn"
+                      disabled={loading.setBlacklist}
+                    >
+                      {loading.setBlacklist ? 'Saving...' : 'Save Blacklist'}
+                    </button>
+                    {projectBlacklist && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setBlacklistEditMode(false);
+                        }}
+                        className="cancel-edit-btn"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <BlacklistForm 
                   blacklist={projectBlacklist} 
@@ -2016,8 +2037,7 @@ const BlacklistForm: React.FC<BlacklistFormProps> = ({ blacklist, onSave, loadin
 
   return (
     <div className="blacklist-form-container">
-      <div className="blacklist-form-header">
-        <h3>Configure Entry Blacklist</h3>
+      <div className="form-description-block">
         <p className="form-description">
           Add entries (one per line) that should be automatically filtered out during data processing.
           Leave sections empty if not needed.
@@ -2075,7 +2095,7 @@ const BlacklistForm: React.FC<BlacklistFormProps> = ({ blacklist, onSave, loadin
         <button
           onClick={handleSave}
           disabled={loading}
-          className="save-blacklist-btn primary"
+          className="save-blacklist-btn-internal hidden-submit-btn"
         >
           {loading ? 'Saving Blacklist...' : 'Save Blacklist'}
         </button>

@@ -948,6 +948,67 @@
   display: none;
 }
 
+.save-blacklist-btn {
+  background: linear-gradient(135deg, #00d4aa 0%, #00b899 100%);
+  border: none;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 25px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 212, 170, 0.3);
+}
+
+.save-blacklist-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 212, 170, 0.4);
+}
+
+.save-blacklist-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.edit-blacklist-btn {
+  background: linear-gradient(135deg, #ff1493 0%, #ff69b4 100%);
+  border: none;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 25px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(255, 20, 147, 0.3);
+}
+
+.edit-blacklist-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 20, 147, 0.4);
+}
+
+.form-description-block {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: rgba(0, 212, 255, 0.05);
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  border-radius: 8px;
+}
+
+.form-description-block .form-description {
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  line-height: 1.5;
+  font-size: 0.95rem;
+}
+
 .saved-rules-content {
   display: flex;
   flex-direction: column;
@@ -1993,9 +2054,7 @@ input:focus {
 
 /* Blacklist Management Styles */
 .blacklist-management {
-  background: #1a1a1a;
-  margin: 0;
-  padding: 0;
+  /* Inherits centering from .section */
 }
 
 .blacklist-form {
@@ -2003,7 +2062,8 @@ input:focus {
   padding: 2rem;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  margin-top: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .blacklist-form-container {
@@ -2013,14 +2073,23 @@ input:focus {
 }
 
 .blacklist-form-header {
-  margin-bottom: 2rem;
-  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  margin: -2rem -2rem 2rem -2rem;
+  border-radius: 12px 12px 0 0;
 }
 
 .blacklist-form-header h3 {
-  color: #00d4ff;
-  margin-bottom: 0.5rem;
-  font-size: 1.5rem;
+  color: #ffffff;
+  font-size: 1.3rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
 }
 
 .blacklist-form-header .form-description {
@@ -2134,6 +2203,8 @@ input:focus {
 /* Saved Blacklist Display */
 .blacklist-saved-display {
   padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
   background: rgba(0, 212, 255, 0.1);
   border: 1px solid rgba(0, 212, 255, 0.3);
   border-radius: 12px;
