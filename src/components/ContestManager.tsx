@@ -1010,56 +1010,6 @@ const ContestManager: React.FC = () => {
 
         {hasClientAndProject && (
           <>
-            {/* File Upload Section */}
-            <div className="file-upload-section">
-              <div className="upload-section-header">
-                <h3>📁 File Management</h3>
-                <p className="upload-description">
-                  Upload contest data files or project documents to S3
-                </p>
-              </div>
-              
-              <div className="upload-tabs">
-                <div className="upload-tab-content">
-                  <div className="upload-option">
-                    <h4>📊 Contest Data Upload (Partner API)</h4>
-                    <p>Upload contest entries to <code>entries/raw/</code> directory</p>
-                    <FileUpload
-                      bucketName={selectedBucket}
-                      projectName={selectedProject}
-                      uploadType="partner"
-                      acceptedFileTypes={['.json', '.csv', '.xlsx']}
-                      onUploadComplete={(fileKey) => {
-                        console.log('Contest data uploaded:', fileKey);
-                        // Refresh raw entries count
-                        loadProjectData();
-                      }}
-                      onUploadError={(error) => {
-                        console.error('Upload error:', error);
-                      }}
-                    />
-                  </div>
-                  
-                  <div className="upload-option">
-                    <h4>📄 Project Documents</h4>
-                    <p>Upload project files to <code>project_docs/</code> directory</p>
-                    <FileUpload
-                      bucketName={selectedBucket}
-                      projectName={selectedProject}
-                      uploadType="client"
-                      acceptedFileTypes={['.pdf', '.doc', '.docx', '.txt', '.zip']}
-                      onUploadComplete={(fileKey) => {
-                        console.log('Document uploaded:', fileKey);
-                      }}
-                      onUploadError={(error) => {
-                        console.error('Upload error:', error);
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
             {/* Data Processing Controls */}
             <div className="data-processing-controls">
               <div className="processing-actions">
@@ -1496,6 +1446,74 @@ const ContestManager: React.FC = () => {
               <div className="no-selection-icon">📸</div>
               <h3>Select Client & Project</h3>
               <p>Choose a client and project above to validate receipt images.</p>
+            </div>
+          </div>
+        )}
+      </section>
+
+      {/* File Management */}
+      <section className="section file-management">
+        <div className="section-header">
+          <h2>📁 File Management</h2>
+        </div>
+
+        {hasClientAndProject && (
+          <div className="file-upload-section">
+            <div className="upload-section-header">
+              <h3>Upload Files</h3>
+              <p className="upload-description">
+                Upload contest data files or project documents to S3
+              </p>
+            </div>
+            
+            <div className="upload-tabs">
+              <div className="upload-tab-content">
+                <div className="upload-option">
+                  <h4>📊 Contest Data Upload (Partner API)</h4>
+                  <p>Upload contest entries to <code>entries/raw/</code> directory</p>
+                  <FileUpload
+                    bucketName={selectedBucket}
+                    projectName={selectedProject}
+                    uploadType="partner"
+                    acceptedFileTypes={['.json', '.csv', '.xlsx']}
+                    onUploadComplete={(fileKey) => {
+                      console.log('Contest data uploaded:', fileKey);
+                      // Refresh raw entries count
+                      loadProjectData();
+                    }}
+                    onUploadError={(error) => {
+                      console.error('Upload error:', error);
+                    }}
+                  />
+                </div>
+                
+                <div className="upload-option">
+                  <h4>📄 Project Documents</h4>
+                  <p>Upload project files to <code>project_docs/</code> directory</p>
+                  <FileUpload
+                    bucketName={selectedBucket}
+                    projectName={selectedProject}
+                    uploadType="client"
+                    acceptedFileTypes={['.pdf', '.doc', '.docx', '.txt', '.zip']}
+                    onUploadComplete={(fileKey) => {
+                      console.log('Document uploaded:', fileKey);
+                    }}
+                    onUploadError={(error) => {
+                      console.error('Upload error:', error);
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {!hasClientAndProject && (
+          <div className="no-selection-state">
+            <div className="no-selection-content">
+              <div className="no-selection-icon">📁</div>
+              <h3>Select Client & Project</h3>
+              <p>Choose a client and project above to upload files.</p>
             </div>
           </div>
         )}
