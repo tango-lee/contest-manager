@@ -1,0 +1,217 @@
+.project-config {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.config-section {
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.config-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.config-section h3 {
+  font-size: 18px;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.help-text {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 16px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.section-header .actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Input Groups */
+.input-group {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.input-group label {
+  font-weight: 500;
+  color: #555;
+  min-width: 100px;
+}
+
+.url-input,
+.email-input,
+.date-input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.url-input:focus,
+.email-input:focus,
+.date-input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.date-inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+}
+
+.date-inputs .input-group {
+  flex: 1;
+  min-width: 200px;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.date-display {
+  padding: 12px;
+  background: #f9f9f9;
+  border-radius: 6px;
+}
+
+.date-badge {
+  display: inline-block;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 20px;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+/* Buttons */
+.btn-primary,
+.btn-secondary,
+.btn-danger {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: #667eea;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #5568d3;
+  transform: translateY(-1px);
+}
+
+.btn-primary:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.btn-large {
+  padding: 12px 24px;
+  font-size: 16px;
+}
+
+.btn-secondary {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #e0e0e0;
+}
+
+.btn-danger {
+  background: #f5576c;
+  color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #e04757;
+}
+
+/* QR Controls */
+.qr-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.qr-controls .email-input {
+  max-width: 300px;
+}
+
+/* Messages */
+.error-message,
+.success-message {
+  margin-top: 8px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.error-message {
+  background: #ffe5e5;
+  color: #c00;
+  border: 1px solid #ffcccc;
+}
+
+.success-message {
+  background: #e5ffe5;
+  color: #0a0;
+  border: 1px solid #ccffcc;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .project-config {
+    padding: 16px;
+  }
+
+  .input-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .qr-controls {
+    flex-direction: column;
+  }
+
+  .qr-controls .email-input {
+    max-width: 100%;
+  }
+
+  .date-inputs {
+    flex-direction: column;
+  }
+}
+

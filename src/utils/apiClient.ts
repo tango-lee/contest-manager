@@ -16,6 +16,29 @@ export interface ContestEntry {
   agree_rules: boolean;
   points?: number;
   date_created?: string; // ISO string
+  
+  // AWS-managed serialization fields (added automatically by Lambda)
+  aws_entry_id?: string; // Unique ID for external list matching (e.g., "5678_20251029_174722_000341")
+  aws_processing_batch?: string; // Processing batch timestamp (e.g., "20251029_174722")
+  aws_entry_sequence?: number; // Sequential number within processing batch
+  source_file?: string; // Source raw JSON file path
+  processed_timestamp?: string; // ISO timestamp when processed by AWS
+  
+  // Partner's original fields (preserved from upload)
+  id?: string; // Partner's original ID from their CSV
+  full_name?: string; // Full name (may differ from first_name + last_name)
+  birthday?: string; // Birth date in various formats
+  city?: string;
+  state?: string;
+  zip?: string;
+  referrer?: string;
+  agreePrivacy?: string;
+  readOfficialRules?: string;
+  dateAdded?: string;
+  status?: string;
+  
+  // Flexible: Any other custom fields partners may include
+  [key: string]: any;
 }
 
 export interface WinnerRule {
