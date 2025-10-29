@@ -742,6 +742,33 @@ const ContestManager: React.FC = () => {
           <>
             {rulesEditMode ? (
               <div className="rules-form">
+                <div className="rules-form-header">
+                  <h3>{contestRules ? '✏️ Edit Contest Rules' : '📝 Set Contest Rules'}</h3>
+                  <div className="rules-actions">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const form = document.querySelector('.contest-rules-form') as HTMLFormElement;
+                        if (form) form.requestSubmit();
+                      }}
+                      className="save-rules-btn"
+                      disabled={loading.setRules}
+                    >
+                      {loading.setRules ? 'Saving...' : 'Save Rules'}
+                    </button>
+                    {contestRules && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRulesEditMode(false);
+                        }}
+                        className="cancel-edit-btn"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  </div>
+                </div>
                 <ContestRulesForm 
                   rules={contestRules} 
                   onSave={setRules} 
@@ -1776,7 +1803,7 @@ const ContestRulesForm: React.FC<ContestRulesFormProps> = ({ rules, onSave, load
   };
 
   return (
-    <form onSubmit={handleSubmit} className="rules-form">
+    <form onSubmit={handleSubmit} className="contest-rules-form">
       <div className="form-grid">
         {/* Max Entries Per Person */}
         <div className="form-group">
@@ -1954,7 +1981,7 @@ const ContestRulesForm: React.FC<ContestRulesFormProps> = ({ rules, onSave, load
         )}
       </div>
 
-      <button type="submit" className="action-btn primary" disabled={loading}>
+      <button type="submit" className="action-btn primary hidden-submit-btn" disabled={loading}>
         {loading ? 'Setting Rules...' : 'Set Contest Rules'}
       </button>
     </form>
