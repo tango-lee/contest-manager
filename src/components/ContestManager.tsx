@@ -66,6 +66,33 @@ const ContestManager: React.FC = () => {
     }
   }, [selectedBucket]);
 
+  // Handler for bucket selection change - clears all project-related state
+  const handleBucketChange = (newBucket: string) => {
+    setSelectedBucket(newBucket);
+    
+    // Clear all project-related state
+    setSelectedProject('');
+    setProjects([]);
+    setRawEntries([]);
+    setValidatedFiles([]);
+    setContestRules(null);
+    setProjectBlacklist(null);
+    setWinners([]);
+    setProcessingStatus(null);
+    setUniqodeAnalytics(null);
+    setFlightStartDate('');
+    setFlightEndDate('');
+    setLastRawSync(null);
+    
+    // Reset edit modes
+    setRulesEditMode(true);
+    setBlacklistEditMode(true);
+    setFlightDatesEditMode(false);
+    
+    // Clear any errors
+    setErrors({});
+  };
+
   // Check for existing contest rules when client/project selected
   const checkExistingRules = useCallback(async () => {
     if (!selectedBucket || !selectedProject) return;
@@ -571,7 +598,7 @@ const ContestManager: React.FC = () => {
               <div className="inline-controls">
                 <select
                   value={selectedBucket}
-                  onChange={(e) => setSelectedBucket(e.target.value)}
+                  onChange={(e) => handleBucketChange(e.target.value)}
                   disabled={loading.buckets}
                 >
                   <option value="">Select a client folder...</option>
@@ -596,10 +623,7 @@ const ContestManager: React.FC = () => {
                 <span className="selected-client-text">aws/optivateagency/{selectedBucket}</span>
                 <button 
                   className="remove-client-btn" 
-                  onClick={() => {
-                    setSelectedBucket('');
-                    setSelectedProject('');
-                  }}
+                  onClick={() => handleBucketChange('')}
                   title="Remove client selection"
                 >
                   ×
