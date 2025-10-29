@@ -301,8 +301,9 @@ const ContestManager: React.FC = () => {
           // For new project, reload projects for the current client
           await loadProjects();
           
-          // Auto-select the newly created project (use handler to clear state properly)
-          handleProjectChange(projectName);
+          // Auto-select the newly created project - just set it, don't clear data
+          // The useEffect will load the data including the contest-rules.json we just created
+          setSelectedProject(projectName);
         }
         
         // Close modal and reset
