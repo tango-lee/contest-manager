@@ -295,8 +295,8 @@ const ContestManager: React.FC = () => {
           // Reload buckets from AWS to include the newly created bucket
           await loadBuckets();
           
-          // Auto-select the newly created client (use handler to clear state properly)
-          handleBucketChange(fullBucketName);
+          // Auto-select the newly created client - just set it, useEffect will handle loading
+          setSelectedBucket(fullBucketName);
         } else {
           // For new project, reload projects for the current client
           await loadProjects();
