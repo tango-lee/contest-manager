@@ -18,6 +18,7 @@ const ContestManager: React.FC = () => {
   const [lastRawSync, setLastRawSync] = useState<string | null>(null);
   const [flightStartDate, setFlightStartDate] = useState('');
   const [flightEndDate, setFlightEndDate] = useState('');
+  const [flightDatesEditMode, setFlightDatesEditMode] = useState<boolean>(false);
   const [winners, setWinners] = useState<Winner[]>([]);
   const [projectBlacklist, setProjectBlacklist] = useState<ProjectBlacklist | null>(null);
   const [blacklistEditMode, setBlacklistEditMode] = useState<boolean>(true);
@@ -75,16 +76,23 @@ const ContestManager: React.FC = () => {
       if (existingRules) {
         setContestRules(existingRules);
         setRulesEditMode(false); // Show saved state if rules exist
+        // Load flight dates from contest rules
+        if (existingRules.flight_start_date) {
+          setFlightStartDate(existingRules.flight_start_date);
+        }
+        if (existingRules.flight_end_date) {
+          setFlightEndDate(existingRules.flight_end_date);
+        }
       } else {
         setContestRules(null);
-        setRulesEditMode(true); // Show form if no rules exist
+        setRulesEditMode(true);
       }
     } catch (error) {
       console.error('Failed to check existing rules:', error);
       setContestRules(null);
       setRulesEditMode(true);
     }
-  }, [selectedBucket, selectedProject, flightStartDate, flightEndDate]);
+  }, [selectedBucket, selectedProject]);
 
   // Check for existing blacklist when client/project selected
   const checkExistingBlacklist = useCallback(async () => {
@@ -350,6 +358,53 @@ const ContestManager: React.FC = () => {
     }
   };
 
+  const saveFlightDates = async () => {
+    if (!selectedBucket || !selectedProject) return;
+    
+    try {
+      setLoading(prev => ({ ...prev, flightDates: true }));
+      setErrors(prev => ({ ...prev, flightDates: '' }));
+      
+      // Get existing contest rules or create new ones
+      const existingRules = await contestAPI.getExistingRules(selectedBucket, selectedProject);
+      
+      const updatedRules: ContestRules = existingRules || {
+        age_min: 18,
+        age_max: 99,
+        eligible_states: [],
+        entry_start_date: '',
+        entry_end_date: '',
+        max_entries_per_person: 1,
+        total_winners: 1,
+        winner_rules: [],
+        flight_start_date: flightStartDate,
+        flight_end_date: flightEndDate,
+        prize_structure: {
+          grand_prize: '',
+          runner_up_prizes: []
+        }
+      };
+      
+      // Update flight dates
+      updatedRules.flight_start_date = flightStartDate;
+      updatedRules.flight_end_date = flightEndDate;
+      
+      // Save to S3
+      await contestAPI.setContestRules(selectedBucket, selectedProject, updatedRules);
+      
+      setContestRules(updatedRules);
+      setFlightDatesEditMode(false);
+      
+      alert('Flight dates saved successfully!');
+      
+    } catch (error) {
+      console.error('Failed to save flight dates:', error);
+      setErrors(prev => ({ ...prev, flightDates: `Failed to save flight dates: ${error}` }));
+    } finally {
+      setLoading(prev => ({ ...prev, flightDates: false }));
+    }
+  };
+
   const setBlacklist = async (blacklist: ProjectBlacklist) => {
     try {
       setLoading(prev => ({ ...prev, setBlacklist: true }));
@@ -604,14 +659,63 @@ const ContestManager: React.FC = () => {
                   <span className="context-label">Project:</span>
                   <span className="context-value">{selectedProject}</span>
                 </div>
-            <div className="context-item">
+            <div className="context-item flight-dates-section">
               <span className="context-label">Project Flight Dates:</span>
-              <span className="context-value">
-                {flightStartDate && flightEndDate
-                  ? `${new Date(flightStartDate).toLocaleDateString()} to ${new Date(flightEndDate).toLocaleDateString()}`
-                  : 'Not set'
-                }
-              </span>
+              {flightDatesEditMode ? (
+                <div className="flight-dates-edit">
+                  <input
+                    type="date"
+                    value={flightStartDate}
+                    onChange={(e) => setFlightStartDate(e.target.value)}
+                    className="date-input-inline"
+                  />
+                  <span className="date-separator">to</span>
+                  <input
+                    type="date"
+                    value={flightEndDate}
+                    onChange={(e) => setFlightEndDate(e.target.value)}
+                    className="date-input-inline"
+                  />
+                  <button
+                    onClick={saveFlightDates}
+                    disabled={loading.flightDates || !flightStartDate || !flightEndDate}
+                    className="btn-small btn-save"
+                  >
+                    {loading.flightDates ? 'Saving...' : 'Save'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setFlightDatesEditMode(false);
+                      // Restore from contest rules if available
+                      if (contestRules) {
+                        setFlightStartDate(contestRules.flight_start_date || '');
+                        setFlightEndDate(contestRules.flight_end_date || '');
+                      }
+                    }}
+                    className="btn-small btn-cancel"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <div className="flight-dates-display">
+                  <span className="context-value">
+                    {flightStartDate && flightEndDate
+                      ? `${new Date(flightStartDate).toLocaleDateString()} to ${new Date(flightEndDate).toLocaleDateString()}`
+                      : 'Not set'
+                    }
+                  </span>
+                  <button
+                    onClick={() => setFlightDatesEditMode(true)}
+                    className="btn-small btn-edit"
+                  >
+                    {flightStartDate && flightEndDate ? 'Edit' : 'Set Dates'}
+                  </button>
+                </div>
+              )}
+              {errors.flightDates && (
+                <div className="error-message-inline">{errors.flightDates}</div>
+              )}
             </div>
               </div>
               

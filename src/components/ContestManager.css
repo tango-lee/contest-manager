@@ -2640,3 +2640,101 @@ input:focus {
     font-size: 11px;
   }
 }
+
+/* Flight Dates Inline Editor */
+.context-item.flight-dates-section {
+  flex-direction: column;
+  align-items: flex-start !important;
+  gap: 0.5rem;
+}
+
+.flight-dates-display {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.flight-dates-edit {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.date-input-inline {
+  padding: 0.4rem 0.6rem;
+  border: 2px solid #e5e5e5;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: #333;
+  background: #fff;
+  transition: all 0.2s ease;
+}
+
+.date-input-inline:focus {
+  outline: none;
+  border-color: #ff1493;
+  box-shadow: 0 0 0 3px rgba(255, 20, 147, 0.1);
+}
+
+.date-separator {
+  color: #00d4ff;
+  font-weight: 500;
+  margin: 0 0.25rem;
+}
+
+.btn-small {
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-small:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-edit {
+  background: #ff1493;
+  color: white;
+}
+
+.btn-edit:hover:not(:disabled) {
+  background: #e01282;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(255, 20, 147, 0.2);
+}
+
+.btn-save {
+  background: #00d4aa;
+  color: white;
+}
+
+.btn-save:hover:not(:disabled) {
+  background: #00c099;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 212, 170, 0.2);
+}
+
+.btn-cancel {
+  background: #6c757d;
+  color: white;
+}
+
+.btn-cancel:hover:not(:disabled) {
+  background: #5a6268;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(108, 117, 125, 0.2);
+}
+
+.error-message-inline {
+  color: #ff6b6b;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+  font-weight: 500;
+}
