@@ -1334,6 +1334,31 @@
   font-size: 1rem;
   margin-bottom: 1.5rem;
   line-height: 1.5;
+  color: #333333;
+}
+
+.modal-body label {
+  color: #333333 !important;
+  font-weight: 600;
+}
+
+.modal-body .input-group label {
+  color: #333333 !important;
+}
+
+.modal-body .form-group label {
+  color: #333333 !important;
+}
+
+.modal-body small,
+.modal-body .help-text {
+  color: #666666 !important;
+}
+
+.modal-body h4 {
+  color: #333333 !important;
+  font-weight: 600;
+  margin-bottom: 1rem;
 }
 
 .modal-input {
