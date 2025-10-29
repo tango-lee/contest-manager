@@ -35,6 +35,7 @@ export interface ContestRules {
   winner_rules: WinnerRule[];
   flight_start_date: string; // Project flight dates from modal
   flight_end_date: string;   // Project flight dates from modal
+  microsite_url?: string;     // Microsite URL for QR code generation
   prize_structure: {
     grand_prize: string;
     runner_up_prizes: string[];
@@ -527,6 +528,66 @@ class ContestManagerAPI {
   async refreshUniqodeData(bucketName: string, projectName: string): Promise<void> {
     // Trigger a manual sync of Uniqode data
     await this.syncUniqodeAnalytics(bucketName, projectName);
+  }
+
+  // Contest Configuration Management
+  async getContestConfig(bucketName: string, projectName: string): Promise<ContestRules | null> {
+    try {
+      return await this.request(`/contest/${bucketName}/${projectName}/config`);
+    } catch (error) {
+      console.warn('Failed to get contest config:', error);
+      return null;
+    }
+  }
+
+  async updateContestConfig(bucketName: string, projectName: string, config: Partial<ContestRules>): Promise<ContestRules> {
+    return this.request(`/contest/${bucketName}/${projectName}/config`, {
+      method: 'PUT',
+      body: JSON.stringify(config),
+    });
+  }
+
+  async deleteFlightDates(bucketName: string, projectName: string): Promise<void> {
+    await this.request(`/contest/${bucketName}/${projectName}/flight-dates`, {
+      method: 'DELETE',
+    });
+  }
+
+  async emailContestConfig(bucketName: string, projectName: string, email: string): Promise<void> {
+    await this.request(`/contest/${bucketName}/${projectName}/email`, {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  }
+
+  // QR Code Generation
+  async generateQRCode(bucketName: string, projectName: string, micrositeUrl?: string, email?: string): Promise<{
+    qr_url: string;
+    microsite_url: string;
+    s3_location: string;
+    email_sent: boolean;
+  }> {
+    return this.request(`/qr/generate/${bucketName}/${projectName}`, {
+      method: 'POST',
+      body: JSON.stringify({ url: micrositeUrl, email }),
+    });
+  }
+
+  // Receipt Validation Methods
+  async getS3Object(bucketName: string, key: string): Promise<any> {
+    // For now, return a simple fetch to S3
+    // In production, this should go through API Gateway with presigned URL
+    const response = await fetch(`https://${bucketName}.s3.amazonaws.com/${key}`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch S3 object: ${response.statusText}`);
+    }
+    return response.json();
+  }
+
+  async getDownloadUrl(bucketName: string, key: string): Promise<string> {
+    // Generate a presigned download URL through API Gateway
+    // For now, return direct S3 URL (in production, use presigned URL endpoint)
+    return `https://${bucketName}.s3.amazonaws.com/${key}`;
   }
 }
 

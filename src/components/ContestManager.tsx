@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { contestAPI, S3Bucket, S3Project, S3File, ContestRules, ProcessingStatus, Winner, WinnerRule, ProjectBlacklist, UniqodeAnalytics } from '../utils/apiClient';
 import FileUpload from './FileUpload';
+import ReceiptValidation from './ReceiptValidation';
 import './ContestManager.css';
 
 const ContestManager: React.FC = () => {
@@ -1324,6 +1325,29 @@ const ContestManager: React.FC = () => {
         )}
       </section>
 
+      {/* Receipt Validation */}
+      <section className="section receipt-validation-section">
+        <div className="section-header">
+          <h2>📸 Receipt Validation</h2>
+        </div>
+
+        {hasClientAndProject && (
+          <ReceiptValidation
+            selectedBucket={selectedBucket}
+            selectedProject={selectedProject}
+          />
+        )}
+
+        {!hasClientAndProject && (
+          <div className="no-selection-state">
+            <div className="no-selection-content">
+              <div className="no-selection-icon">📸</div>
+              <h3>Select Client & Project</h3>
+              <p>Choose a client and project above to validate receipt images.</p>
+            </div>
+          </div>
+        )}
+      </section>
 
       {/* Create Bucket Modal */}
       {showCreateModal && (
